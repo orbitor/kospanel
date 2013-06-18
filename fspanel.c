@@ -38,6 +38,14 @@
 
 Display *dd;
 Window root_win;
+/* WM supports EWMH
+This flag is set if the window manager supports the EWMH protocol for e.g.
+switching workspaces. The fallback if this is not supported is to use the
+Gnome variant. This is determined by looking for the presence of the
+_NET_SUPPORTED property of the root window. Note that this is only used
+for communication with the WM, whether each client supports this protocol
+is up to the individual client. */
+int wm_use_ewmh;
 Pixmap generic_icon;
 Pixmap generic_mask;
 GC fore_gc;
@@ -72,7 +80,17 @@ char *atom_names[] = {
 	"_WIN_CLIENT_LIST",
 	"_WIN_WORKSPACE_COUNT",
 	"_WIN_STATE",
-	"WM_STATE"
+	"WM_STATE",
+	"_NET_NUMBER_OF_DESKTOPS",
+	"_NET_CURRENT_DESKTOP",
+	"_NET_WM_STATE",
+	"_NET_WM_STATE_ABOVE",
+	"_NET_SUPPORTED",
+	"_NET_WM_WINDOW_TYPE",
+	"_NET_WM_WINDOW_TYPE_DESKTOP",
+	"_NET_WM_DESKTOP",
+	"_NET_WM_NAME",
+	"UTF8_STRING",
 };
 
 #define ATOM_COUNT (sizeof (atom_names) / sizeof (atom_names[0]))
@@ -89,6 +107,16 @@ Atom atoms[ATOM_COUNT];
 #define atom__WIN_WORKSPACE_COUNT atoms[7]
 #define atom__WIN_STATE atoms[8]
 #define atom_WM_STATE atoms[9]
+#define atom__NET_NUMBER_OF_DESKTOPS atoms[10]
+#define atom__NET_CURRENT_DESKTOP atoms[11]
+#define atom__NET_WM_STATE atoms[12]
+#define atom__NET_WM_STATE_ABOVE atoms[13]
+#define atom__NET_SUPPORTED atoms[14]
+#define atom__NET_WM_WINDOW_TYPE atoms[15]
+#define atom__NET_WM_WINDOW_TYPE_DESKTOP atoms[16]
+#define atom__NET_WM_DESKTOP atoms[17]
+#define atom__NET_WM_NAME atoms[18]
+#define atom_UTF8_STRING atoms[19]
 
 
 void *
@@ -132,12 +160,14 @@ fill_rect (taskbar *tb, int x, int y, int a, int b)
 void
 scale_icon (task *tk)
 {
-	int xx, yy, x, y, w, h, d, bw;
+	int xx, yy, x, y;
+	unsigned int w, h, d, bw;
 	Pixmap pix, mk = None;
 	XGCValues gcv;
-	GC mgc;
+	GC mgc = None;
 
-	XGetGeometry (dd, tk->icon, &pix, &x, &y, &w, &h, &bw, &d);
+	Window unused;
+	XGetGeometry (dd, tk->icon, &unused, &x, &y, &w, &h, &bw, &d);
 	pix = XCreatePixmap (dd, tk->win, ICONWIDTH, ICONHEIGHT, scr_depth);
 
 	if (tk->mask != None)
@@ -221,13 +251,40 @@ get_task_kdeicon (task *tk)
 	}
 }
 
+/* returns whether the window is visible on the desktop */
 int
-find_desktop (Window win)
+is_visible_on_desktop (Window win, int desk)
+{
+	int client_desk = -1;
+	unsigned long *data;
+
+	if (wm_use_ewmh)
+		data = get_prop_data (win, atom__NET_WM_DESKTOP, XA_CARDINAL, 0);
+	else
+		data = get_prop_data (win, atom__WIN_WORKSPACE, XA_CARDINAL, 0);
+
+	if (data)
+	{
+		client_desk = *data;
+		XFree (data);
+	}
+
+	/* If the client_desk is -1, it is visible on all desktops */
+	return (client_desk == -1) || (client_desk == desk);
+}
+
+/* index of the currently displayed desktop */
+int
+get_current_desktop ()
 {
 	int desk = 0;
 	unsigned long *data;
 
-	data = get_prop_data (win, atom__WIN_WORKSPACE, XA_CARDINAL, 0);
+	if (wm_use_ewmh)
+		data = get_prop_data (root_win, atom__NET_CURRENT_DESKTOP, XA_CARDINAL, 0);
+	else
+		data = get_prop_data (root_win, atom__WIN_WORKSPACE, XA_CARDINAL, 0);
+
 	if (data)
 	{
 		desk = *data;
@@ -269,19 +326,36 @@ is_iconified (Window win)
 	return ret;
 }
 
+/* window name
+The returned pointer must be freed using XFree() after use.
+
+TODO: The encoding for WM_NAME can be STRING or COMPOUND_TEXT. In any case
+this encoding should be normalized before returning from this function. */
+char*
+get_window_name (Window win)
+{
+	char* res = NULL;
+	/* try EWMH's _NET_WM_NAME first */
+	res = get_prop_data (win, atom__NET_WM_NAME, atom_UTF8_STRING, 0);
+	if (!res)
+		/* fallback to WM_NAME */
+		res = get_prop_data (win, XA_WM_NAME, XA_STRING, 0);
+	return res;
+}
+
 void
 add_task (taskbar * tb, Window win, int focus)
 {
 	task *tk, *list;
 
-	/* is this window on a different desktop? */
-	if (tb->my_desktop != find_desktop (win) || is_hidden (win))
+	/* is this window on a different desktop or hidden? */
+	if (!is_visible_on_desktop (win, tb->my_desktop) || is_hidden (win))
 		return;
 
 	tk = calloc (1, sizeof (task));
 	tk->win = win;
 	tk->focused = focus;
-	tk->name = get_prop_data (win, XA_WM_NAME, XA_STRING, 0);
+	tk->name = get_window_name (win);
 	tk->iconified = is_iconified (win);
 
 	get_task_kdeicon (tk);
@@ -329,6 +403,7 @@ gui_create_taskbar (void)
 {
 	taskbar *tb;
 	Window win;
+	XClassHint wm_class;
 	MWMHints mwm;
 	XSizeHints size_hints;
 	XWMHints wmhints;
@@ -351,11 +426,30 @@ gui_create_taskbar (void)
 								  /*value mask*/ CWBackPixel | CWEventMask,
 								  /* attribs */ &att);
 
-	/* don't let any windows cover fspanel */
-	set_prop (win, atom__WIN_LAYER, 10);	/* WIN_LAYER_ABOVE_DOCK */
+	/* set name and class */
+	wm_class.res_name = "fspanel";
+	wm_class.res_class = "fspanel";
+	XSetClassHint (dd, win, &wm_class);
 
-	set_prop (win, atom__WIN_STATE, WIN_STATE_STICKY |
-				 WIN_STATE_FIXED_POSITION);
+	/* don't let any windows cover fspanel */
+	if (wm_use_ewmh)
+	{
+		XChangeProperty (dd, win,
+		                 atom__NET_WM_STATE, XA_ATOM, 32,
+		                 PropModeReplace,
+		                 (unsigned char *) &atom__NET_WM_STATE_ABOVE, 1);
+
+		XChangeProperty (dd, win,
+		                 atom__NET_WM_WINDOW_TYPE, XA_ATOM, 32,
+		                 PropModeReplace,
+		                 (unsigned char *) &atom__NET_WM_WINDOW_TYPE_DESKTOP, 1);
+	}
+	else
+	{
+		set_prop (win, atom__WIN_LAYER, 10);	/* WIN_LAYER_ABOVE_DOCK */
+		set_prop (win, atom__WIN_STATE,
+		          WIN_STATE_STICKY | WIN_STATE_FIXED_POSITION);
+	}
 
 	set_prop (win, atom__WIN_HINTS, WIN_HINTS_SKIP_FOCUS |
 				 WIN_HINTS_SKIP_WINLIST |
@@ -368,7 +462,7 @@ gui_create_taskbar (void)
 							atom__MOTIF_WM_HINTS, 32, PropModeReplace,
 							(unsigned char *) &mwm, sizeof (MWMHints) / 4);
 
-	/* make sure the WM obays our window position */
+	/* make sure the WM obeys our window position */
 	size_hints.flags = PPosition;
 	/*XSetWMNormalHints (dd, win, &size_hints);*/
 	XChangeProperty (dd, win, XA_WM_NORMAL_HINTS,
@@ -459,7 +553,7 @@ gui_draw_task (taskbar * tb, task * tk)
 
 	gui_draw_vline (tb, x);
 
-/*set_foreground (3); *//* it's already 3 from gui_draw_vline() */
+	/*set_foreground (3); *//* it's already 3 from gui_draw_vline() */
 	draw_line (tb, x + 1, 0, x + taskw, 0);
 
 	set_foreground (1);
@@ -539,7 +633,7 @@ gui_draw_clock (taskbar * tb)
 	gui_draw_vline (tb, x);
 	x += TEXTPAD;
 
-/*set_foreground (3); *//* white *//* it's already 3 from gui_draw_vline() */
+	/*set_foreground (3); *//* white *//* it's already 3 from gui_draw_vline() */
 	draw_line (tb, x + 1, WINHEIGHT - 2, old_x + width - TEXTPAD,
 				  WINHEIGHT - 2);
 	draw_line (tb, old_x + width - TEXTPAD, 2, old_x + width - TEXTPAD,
@@ -699,7 +793,7 @@ taskbar_read_clientlist (taskbar * tb)
 	int num, i, rev, desk, new_desk = 0;
 	task *list, *next;
 
-	desk = find_desktop (root_win);
+	desk = get_current_desktop ();
 	if (desk != tb->my_desktop)
 	{
 		new_desk = 1;
@@ -718,7 +812,7 @@ taskbar_read_clientlist (taskbar * tb)
 			return;
 	}
 
-	/* remove windows that arn't in the _WIN_CLIENT_LIST anymore */
+	/* remove windows that aren't in the _WIN_CLIENT_LIST anymore */
 	list = tb->task_list;
 	while (list)
 	{
@@ -765,24 +859,31 @@ void
 switch_desk (taskbar * tb, int rel)
 {
 	XClientMessageEvent xev;
-	unsigned long *data;
+	unsigned long *data, max_desks;
 	int want = tb->my_desktop + rel;
 
 	if (want < 0)
 		return;
 
-	data = get_prop_data (root_win, atom__WIN_WORKSPACE_COUNT, XA_CARDINAL, 0);
-	if (data)
-	{
-		register unsigned long max_desks = *data;
-		XFree (data);
-		if (max_desks <= want)
-			return;
-	}
+	if (wm_use_ewmh)
+		data = get_prop_data (root_win, atom__NET_NUMBER_OF_DESKTOPS, XA_CARDINAL, 0);
+	else
+		data = get_prop_data (root_win, atom__WIN_WORKSPACE_COUNT, XA_CARDINAL, 0);
+	if (!data)
+		/* number of workspaces not available */
+		return;
+
+	max_desks = *data;
+	XFree (data);
+	if (max_desks <= want)
+		return;
 
 	xev.type = ClientMessage;
 	xev.window = root_win;
-	xev.message_type = atom__WIN_WORKSPACE;
+	if (wm_use_ewmh)
+		xev.message_type = atom__NET_CURRENT_DESKTOP;
+	else
+		xev.message_type = atom__WIN_WORKSPACE;
 	xev.format = 32;
 	xev.data.l[0] = want;
 	XSendEvent (dd, root_win, False, SubstructureNotifyMask, (XEvent *) &xev);
@@ -900,12 +1001,23 @@ handle_propertynotify (taskbar * tb, Window win, Atom at)
 
 	if (win == root_win)
 	{
-		if (at == atom__NET_CLIENT_LIST ||
-			 at == atom__WIN_CLIENT_LIST ||
-			 at == atom__WIN_WORKSPACE)
+		if (wm_use_ewmh)
 		{
-			taskbar_read_clientlist (tb);
-			gui_draw_taskbar (tb);
+			if (at == atom__NET_CLIENT_LIST ||
+			    at == atom__NET_CURRENT_DESKTOP)
+			{
+				taskbar_read_clientlist (tb);
+				gui_draw_taskbar (tb);
+			}
+		}
+		else
+		{
+			if (at == atom__WIN_CLIENT_LIST ||
+			    at == atom__WIN_WORKSPACE)
+			{
+				taskbar_read_clientlist (tb);
+				gui_draw_taskbar (tb);
+			}
 		}
 		return;
 	}
@@ -914,12 +1026,12 @@ handle_propertynotify (taskbar * tb, Window win, Atom at)
 	if (!tk)
 		return;
 
-	if (at == XA_WM_NAME)
+	if (at == XA_WM_NAME || at == atom__NET_WM_NAME)
 	{
 		/* window's title changed */
 		if (tk->name)
 			XFree (tk->name);
-		tk->name = get_prop_data (tk->win, XA_WM_NAME, XA_STRING, 0);
+		tk->name = get_window_name (tk->win);
 		gui_draw_task (tb, tk);
 	} else if (at == atom_WM_STATE)
 	{
@@ -959,6 +1071,7 @@ main (int argc, char *argv[])
 	int xfd;
 	time_t now;
 	struct tm *lt;
+	void *prop;
 
 	dd = XOpenDisplay (NULL);
 	if (!dd)
@@ -975,6 +1088,17 @@ main (int argc, char *argv[])
 	XSetErrorHandler ((XErrorHandler) handle_error);
 
 	XInternAtoms (dd, atom_names, ATOM_COUNT, False, atoms);
+
+	/* check if the WM supports EWMH
+	Note that this is not reliable. When switching to a EWMH-unaware WM, it
+	will not delete this property. Also, we can't react to changes in this
+	without a restart. */
+	prop = get_prop_data (root_win, atom__NET_SUPPORTED, XA_ATOM, NULL);
+	if (prop)
+	{
+		wm_use_ewmh = 1;
+		XFree (prop);
+	}
 
 	gui_init ();
 	tb = gui_create_taskbar ();
@@ -1022,5 +1146,5 @@ main (int argc, char *argv[])
 
 	/*XCloseDisplay (dd);
 
-   return 0;*/
+	return 0;*/
 }

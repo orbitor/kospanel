@@ -1,14 +1,17 @@
 CC = gcc
-C_FLAGS = -DNOSTDLIB -DHAVE_XPM -Wall -I/usr/X11R6/include -malign-loops=2 -malign-jumps=2 -malign-functions=2
-L_FLAGS = -nostdlib -O1 -Xlinker -s -L/usr/X11R6/lib -lX11 -lXpm
+C_FLAGS = -DHAVE_XPM -Wall -I/usr/X11R6/include
+L_FLAGS = -L/usr/X11R6/lib -lX11 -lXpm
+EXTRA_CFLAGS = -g -Os
 PROGNAME = fspanel
 
 $(PROGNAME): Makefile fspanel.c fspanel.h icon.xpm
-	$(CC) $(C_FLAGS) $(L_FLAGS) fspanel.c -o $(PROGNAME)
-	@ls -l $(PROGNAME)
+	$(CC) $(C_FLAGS) $(EXTRA_CFLAGS) fspanel.c -o $(PROGNAME) $(L_FLAGS)
 
-clean: 
+clean:
 	rm -f core *.o $(PROGNAME) nohup.out
 
 install: $(PROGNAME)
-	cp $(PROGNAME) /usr/local/bin
+	install -d -m 755 $(DESTDIR)/usr/bin
+	install -m 755 $(PROGNAME) $(DESTDIR)/usr/bin
+	install -d -m 755 $(DESTDIR)/usr/share/man/man1
+
