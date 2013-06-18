@@ -1,5 +1,5 @@
 CC = gcc
-C_FLAGS = -DNOSTDLIB -DHAVE_XPM -Wall -I/usr/X11R6/include -m386 -malign-loops=2 -malign-jumps=2 -malign-functions=2
+C_FLAGS = -DNOSTDLIB -DHAVE_XPM -Wall -I/usr/X11R6/include -malign-loops=2 -malign-jumps=2 -malign-functions=2
 L_FLAGS = -nostdlib -O1 -Xlinker -s -L/usr/X11R6/lib -lX11 -lXpm
 PROGNAME = fspanel
 
