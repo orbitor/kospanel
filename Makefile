@@ -2,10 +2,10 @@ CC = gcc
 C_FLAGS = -DHAVE_XPM -Wall -I/usr/X11R6/include
 L_FLAGS = -L/usr/X11R6/lib -lX11 -lXpm
 EXTRA_CFLAGS = -g -Os
-PROGNAME = fspanel
+PROGNAME = kospanel
 
-$(PROGNAME): Makefile fspanel.c fspanel.h icon.xpm
-	$(CC) $(C_FLAGS) $(EXTRA_CFLAGS) fspanel.c -o $(PROGNAME) $(L_FLAGS)
+$(PROGNAME): Makefile kospanel.c kospanel.h icon.xpm
+	$(CC) $(C_FLAGS) $(EXTRA_CFLAGS) kospanel.c -o $(PROGNAME) $(L_FLAGS)
 
 clean:
 	rm -f core *.o $(PROGNAME) nohup.out

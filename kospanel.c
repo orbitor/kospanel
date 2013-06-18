@@ -21,7 +21,7 @@
 #include "icon.xpm"
 #endif
 
-#include "fspanel.h"
+#include "kospanel.h"
 
 /* you can edit these */
 #define MAX_TASK_WIDTH 145
