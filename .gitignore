@@ -17,3 +17,6 @@
 *.app
 fspanel
 kospanel
+
+# the build directory
+_build

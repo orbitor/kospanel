@@ -24,7 +24,7 @@
 #include "kospanel.h"
 
 /* you can edit these */
-#define MAX_TASK_WIDTH 145
+#define MAX_TASK_WIDTH 320
 #define ICONWIDTH 16
 #define ICONHEIGHT 16
 #define WINHEIGHT 24
@@ -860,10 +860,7 @@ switch_desk (taskbar * tb, int rel)
 {
 	XClientMessageEvent xev;
 	unsigned long *data, max_desks;
-	int want = tb->my_desktop + rel;
-
-	if (want < 0)
-		return;
+	int to_desktop;
 
 	if (wm_use_ewmh)
 		data = get_prop_data (root_win, atom__NET_NUMBER_OF_DESKTOPS, XA_CARDINAL, 0);
@@ -875,7 +872,37 @@ switch_desk (taskbar * tb, int rel)
 
 	max_desks = *data;
 	XFree (data);
-	if (max_desks <= want)
+
+    /* who doesn't want this to wrap? */
+    if (tb->my_desktop == 0)
+    {
+        if (rel < 0)
+        {
+            to_desktop = max_desks - 1;
+        }
+        else
+        {
+            to_desktop = rel;
+        }
+    }
+    else if (tb->my_desktop >= max_desks - 1)
+    {
+        if (rel > 0)
+        {
+            to_desktop = 0;
+        }
+        else
+        {
+            to_desktop = max_desks - 2;
+        }
+    }
+    else
+    {
+        to_desktop = tb->my_desktop + rel;
+    }
+
+
+	if (max_desks <= to_desktop)
 		return;
 
 	xev.type = ClientMessage;
@@ -885,8 +912,11 @@ switch_desk (taskbar * tb, int rel)
 	else
 		xev.message_type = atom__WIN_WORKSPACE;
 	xev.format = 32;
-	xev.data.l[0] = want;
-	XSendEvent (dd, root_win, False, SubstructureNotifyMask, (XEvent *) &xev);
+	xev.data.l[0] = to_desktop;
+    xev.data.l[1] = 0;  /* explicitly not setting the time-stamp */
+	XSendEvent(dd, root_win, False,
+            SubstructureNotifyMask | SubstructureRedirectMask,
+            (XEvent *) &xev);
 }
 
 void
@@ -896,15 +926,18 @@ handle_press (taskbar * tb, int x, int y)
 
 	if (y > 3 && y < WINHEIGHT - 3)
 	{
+        /* the right arrow is pointing down, so shouldn't
+         * we be going 'down' in desktop order?
+         */
 		if (x >= right_arrow_x && x < right_arrow_x + 9)
 		{
-			switch_desk (tb, +1);
+			switch_desk (tb, -1);
 			return;
 		}
 
 		if (x >= left_arrow_x && x < left_arrow_x + 9)
 		{
-			switch_desk (tb, -1);
+			switch_desk (tb, +1);
 			return;
 		}
 	}
