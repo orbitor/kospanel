@@ -3,8 +3,7 @@ handle_error (Display * d, XErrorEvent * ev)
 {
 }
 
-int
-main (int argc, char *argv[])
+int main (int argc, char *argv[])
 {
     taskbar *tb;
     XEvent ev;
