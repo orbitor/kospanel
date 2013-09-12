@@ -1,5 +1,5 @@
 /*-------------------------------------------------------------------------*/
-/* kosp_base.h
+/* kosp_types.h
  *
  * This module is part of kospanel
  * Copyright (c) 2013, James DeLisle    <jd@luckygreenfrog.com>

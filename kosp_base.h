@@ -21,7 +21,7 @@ void kosp_base_init(kosp_base *self, int isa);
 /*-------------------------------------------------------------------------*/
 /* type functions */
 /*-------------------------------------------------------------------------*/
-inline int kosp_isa(void *vself);
+int kosp_isa(void *vself);
 void kosp_isa_set(void *vself, int isa);
 
 /*-------------------------------------------------------------------------*/
@@ -31,7 +31,7 @@ typedef void (*base_destroy)(void *vself);
 void kosp_base_destroy(void *vself);
 
 /*-------------------------------------------------------------------------*/
-/* type definition */
+/* type declaration */
 /*-------------------------------------------------------------------------*/
 #define KOSP_BASE_MEMBERS_DECLARE \
     base_destroy        destroy; \

@@ -46,7 +46,7 @@ void kosp_base_destroy(void *vself)
 
 /*-------------------------------------------------------------------------*/
 /*-------------------------------------------------------------------------*/
-inline int kosp_isa(void *vself)
+int kosp_isa(void *vself)
 {
     return ((kosp_base *) vself)->isa;
 }

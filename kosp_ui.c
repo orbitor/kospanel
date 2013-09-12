@@ -11,7 +11,6 @@
 #include <string.h>
 #include <X11/Xlib.h>
 #include <X11/Xutil.h>
-#include "kosp_rect.h"
 #include "kosp_ui.h"
 
 /*-------------------------------------------------------------------------*/
@@ -38,26 +37,39 @@ kosp_ui *kosp_ui_create(int isa, int width, int height)
     {
         kosp_ui_init(kui, isa, width, height);
     }
+
+    return kui;
 }
 
 /*-------------------------------------------------------------------------*/
 /*-------------------------------------------------------------------------*/
 void kosp_ui_init_default(kosp_ui *self)
 {
-    if (self)
+    if (NULL == self)
     {
+        return;
     }
+
+    kosp_base_init_default((kosp_base *) self);
+    kosp_ui_funcs_init(self);
 }
 
 /*-------------------------------------------------------------------------*/
 /*-------------------------------------------------------------------------*/
 void kosp_ui_init(kosp_ui *self, int isa, int width, int height)
 {
+    if (NULL == self)
+    {
+        return;
+    }
+
+    kosp_base_init((kosp_base *) self, isa);
+    kosp_ui_funcs_init(self);
 }
 
 /*-------------------------------------------------------------------------*/
 /*-------------------------------------------------------------------------*/
-void kosp_ui_init_funcs(kosp_ui *self)
+void kosp_ui_funcs_init(kosp_ui *self)
 {
     self->destroy = kosp_ui_destroy;
     self->draw = kosp_ui_draw;
@@ -75,16 +87,70 @@ void kosp_ui_init_funcs(kosp_ui *self)
 
 /*-------------------------------------------------------------------------*/
 /*-------------------------------------------------------------------------*/
+int kosp_ui_width(void *vself)
+{
+    if (vself)
+    {
+        return ((kosp_ui *) vself)->posnsize.width;
+    }
+
+    return -1;
+}
+
+/*-------------------------------------------------------------------------*/
+/*-------------------------------------------------------------------------*/
+int kosp_ui_height(void *vself)
+{
+    if (vself)
+    {
+        return ((kosp_ui *) vself)->posnsize.height;
+    }
+
+    return -1;
+}
+
+/*-------------------------------------------------------------------------*/
+/*-------------------------------------------------------------------------*/
+Window kosp_ui_window(void *vself)
+{
+    if (vself)
+    {
+        return ((kosp_ui *) vself)->window;
+    }
+
+    return None;
+}
+
+/*-------------------------------------------------------------------------*/
+/*-------------------------------------------------------------------------*/
+void kosp_ui_init_palette_with_data(void *vself,
+        unsigned short *color_array,
+        int color_array_len)
+{
+}
+
+/*-------------------------------------------------------------------------*/
+/*-------------------------------------------------------------------------*/
+void kosp_ui_line_draw(void *vself, XSegment segment, int pal_index)
+{
+}
+
+/*-------------------------------------------------------------------------*/
+/*-------------------------------------------------------------------------*/
 void kosp_ui_destroy(void *vself)
 {
     kosp_base_destroy(vself);
+}
+
+void kosp_ui_init_palette(void *vself)
+{
 }
 
 void kosp_ui_draw(void *vself)
 {
 }
 
-void kosp_ui_resize(void *vself, kosp_rect *size)
+void kosp_ui_resize(void *vself, XRectangle new_size)
 {
 }
 

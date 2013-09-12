@@ -13,25 +13,47 @@
 #include <X11/Xlib.h>
 #include <X11/Xutil.h>
 #include "kosp_base.h"
-#include "kosp_rect.h"
+
+/*-------------------------------------------------------------------------*/
+/*-------------------------------------------------------------------------*/
+enum
+{
+    KU_CLR_FG_NORMAL,
+    KU_CLR_BG_NORMAL,
+    KU_CLR_FG_SELECTED,
+    KU_CLR_BG_SELECTED,
+    KU_CLR_FG_DISABLED,
+    KU_CLR_BG_DISABLED,
+    KU_CLR_FG_HOVER,
+    KU_CLR_BG_HOVER,
+    KU_CLR_MAX
+};
 
 /*-------------------------------------------------------------------------*/
 /*-------------------------------------------------------------------------*/
 typedef struct _kosp_ui_t kosp_ui;
 
+/* create and init functions */
 kosp_ui *kosp_ui_create_default(void);
 kosp_ui *kosp_ui_create(int isa, int width, int height);
 void kosp_ui_init_default(kosp_ui *self);
 void kosp_ui_init(kosp_ui *self, int isa, int width, int height);
-void kosp_ui_init_funcs(kosp_ui *self);
+void kosp_ui_funcs_init(kosp_ui *self);
 
-/* class functions */
-inline int kosp_ui_width(kosp_ui *self);
-inline int kosp_ui_height(kosp_ui *self);
-inline Window kosp_ui_window(kosp_ui *self);
+/* type functions */
+int kosp_ui_width(void *vself);
+int kosp_ui_height(void *vself);
+Window kosp_ui_window(void *vself);
+
+void kosp_ui_init_palette_with_data(void *vself,
+        unsigned short *color_array,
+        int color_array_len);
+
+void kosp_ui_line_draw(void *vself, XSegment segment, int pal_index);
 
 /* virtual functions */
 typedef void (*ui_func_draw) (void *vself);
+typedef void (*ui_func_init_palette) (void *vself);
 typedef int  (*ui_func_event_button_press) (void *vself, XButtonPressedEvent *event);
 typedef int  (*ui_func_event_button_release) (void *vself, XButtonReleasedEvent *event);
 typedef int  (*ui_func_event_pointer_moved) (void *vself, XPointerMovedEvent *event);
@@ -44,8 +66,9 @@ typedef int  (*ui_func_event_unmap_notify) (void *vself, XUnmapEvent *event);
 typedef int  (*ui_func_event_destroy_notify) (void *vself, XDestroyWindowEvent *event);
 
 void kosp_ui_destroy(void *vself);
+void kosp_ui_init_palette(void *vself);
 void kosp_ui_draw(void *vself);
-void kosp_ui_resize(void *vself, kosp_rect *size);
+void kosp_ui_resize(void *vself, XRectangle new_size);
 int kosp_ui_event_button_press(void *vself, XButtonPressedEvent *event);
 int kosp_ui_event_button_release(void *vself, XButtonReleasedEvent *event);
 int kosp_ui_event_pointer_moved(void *vself, XPointerMovedEvent *event);
@@ -57,8 +80,10 @@ int kosp_ui_event_expose(void *vself, XExposeEvent *event);
 int kosp_ui_event_unmap_notify(void *vself, XUnmapEvent *event);
 int kosp_ui_event_destroy_notify(void *vself, XDestroyWindowEvent *event);
 
+/* type declaration */
 #define KOSP_UI_MEMBERS_DECLARE \
     KOSP_BASE_MEMBERS_DECLARE \
+    ui_func_init_palette            init_palette; \
     ui_func_draw                    draw; \
     ui_func_event_button_press      button_press; \
     ui_func_event_button_release    button_release; \
@@ -70,8 +95,10 @@ int kosp_ui_event_destroy_notify(void *vself, XDestroyWindowEvent *event);
     ui_func_event_expose            expose; \
     ui_func_event_unmap_notify      unmap_notify; \
     ui_func_event_destroy_notify    destroy_notify; \
-    Window                          xwin; \
-    kosp_rect                       posnsize;
+    Window                          window; \
+    GC                              gc; \
+    XRectangle                      posnsize; \
+    unsigned long                   palette[KU_CLR_MAX];
 
 struct _kosp_ui_t
 {

@@ -27,6 +27,13 @@ include_directories(
         ${FREETYPE_INCLUDE_DIRS}
 )
 
+set_source_files_properties(
+        ${KOSPANEL_SOURCES}
+        PROPERTIES
+        COMPILE_FLAGS
+        "-std=c99 -Wall"
+)
+
 add_executable(kospanel
         ${KOSPANEL_SOURCES}
 )
