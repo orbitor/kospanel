@@ -36,7 +36,7 @@ kosp_ui *kosp_ui_create(int isa, int width, int height)
 
     if (kui)
     {
-        kosp_ui_init(isa, width, height);
+        kosp_ui_init(kui, isa, width, height);
     }
 }
 
@@ -44,23 +44,15 @@ kosp_ui *kosp_ui_create(int isa, int width, int height)
 /*-------------------------------------------------------------------------*/
 void kosp_ui_init_default(kosp_ui *self)
 {
-}
-
-/*-------------------------------------------------------------------------*/
-/*-------------------------------------------------------------------------*/
-void kosp_ui_init(int isa, int width, int height)
-{
-}
-
-/*-------------------------------------------------------------------------*/
-/*-------------------------------------------------------------------------*/
-void kosp_ui_destroy(kosp_ui *self)
-{
-    if (NULL != self)
+    if (self)
     {
-        free(self);
-        self = NULL;
     }
+}
+
+/*-------------------------------------------------------------------------*/
+/*-------------------------------------------------------------------------*/
+void kosp_ui_init(kosp_ui *self, int isa, int width, int height)
+{
 }
 
 /*-------------------------------------------------------------------------*/
@@ -81,60 +73,67 @@ void kosp_ui_init_funcs(kosp_ui *self)
     self->destroy_notify = kosp_ui_event_destroy_notify;
 }
 
-void kosp_ui_draw(kosp_ui *self)
+/*-------------------------------------------------------------------------*/
+/*-------------------------------------------------------------------------*/
+void kosp_ui_destroy(void *vself)
+{
+    kosp_base_destroy(vself);
+}
+
+void kosp_ui_draw(void *vself)
 {
 }
 
-void kosp_ui_resize(kosp_ui *self, kosp_rect *size)
+void kosp_ui_resize(void *vself, kosp_rect *size)
 {
 }
 
-int kosp_ui_event_button_press(kosp_ui *self, XButtonPressedEvent *event)
-{
-    return 1;
-}
-
-int kosp_ui_event_button_release(kosp_ui *self, XButtonReleasedEvent *event)
-{
-    return 1;
-}
-
-int kosp_ui_event_pointer_moved(kosp_ui *self, XPointerMovedEvent *event)
+int kosp_ui_event_button_press(void *vself, XButtonPressedEvent *event)
 {
     return 1;
 }
 
-int kosp_ui_event_enter_window(kosp_ui *self, XEnterWindowEvent *event)
+int kosp_ui_event_button_release(void *vself, XButtonReleasedEvent *event)
 {
     return 1;
 }
 
-int kosp_ui_event_leave_window(kosp_ui *self, XLeaveWindowEvent *event)
+int kosp_ui_event_pointer_moved(void *vself, XPointerMovedEvent *event)
 {
     return 1;
 }
 
-int kosp_ui_event_client_message(kosp_ui *self, XClientMessageEvent *event)
+int kosp_ui_event_enter_window(void *vself, XEnterWindowEvent *event)
 {
     return 1;
 }
 
-int kosp_ui_event_property_notify(kosp_ui *self, XPropertyEvent *event)
+int kosp_ui_event_leave_window(void *vself, XLeaveWindowEvent *event)
 {
     return 1;
 }
 
-int kosp_ui_event_expose(kosp_ui *self, XExposeEvent *event)
+int kosp_ui_event_client_message(void *vself, XClientMessageEvent *event)
 {
     return 1;
 }
 
-int kosp_ui_event_unmap_notify(kosp_ui *self, XUnmapEvent *event)
+int kosp_ui_event_property_notify(void *vself, XPropertyEvent *event)
 {
     return 1;
 }
 
-int kosp_ui_event_destroy_notify(kosp_ui *self, XDestroyWindowEvent *event)
+int kosp_ui_event_expose(void *vself, XExposeEvent *event)
+{
+    return 1;
+}
+
+int kosp_ui_event_unmap_notify(void *vself, XUnmapEvent *event)
+{
+    return 1;
+}
+
+int kosp_ui_event_destroy_notify(void *vself, XDestroyWindowEvent *event)
 {
     return 1;
 }

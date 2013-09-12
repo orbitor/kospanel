@@ -17,7 +17,9 @@ set (KOSPANEL_ROOT
 )
 
 set (KOSPANEL_SOURCES
-        ${KOSPANEL_ROOT}/kospanel.c
+        ${KOSPANEL_ROOT}/kosp_base.c
+        ${KOSPANEL_ROOT}/kosp_ui.c
+        ${KOSPANEL_ROOT}/main.c
 )
 
 include_directories(
