@@ -19,9 +19,9 @@ WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT
 OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.
 
-The author thanks Peter Zelezny for creating fspanel and allowing the
-rest of us to stand on his shoulders. Below is the original fspanel
-license:
+Thanks to Peter Zelezny for creating fspanel and showing the
+rest of us a simple way of implementing a useful panel.
+Below is the original fspanel license:
 ===========================================================================
 
 Copyright (C) 2000 Peter Zelezny
