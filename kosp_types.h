@@ -8,7 +8,7 @@
 /*-------------------------------------------------------------------------*/
 
 #ifndef COM_LUCKYGREENFROG_KOSP_TYPES_H_
-#define COM_LUCKYGREENFORG_KOSP_TYPES_H_
+#define COM_LUCKYGREENFROG_KOSP_TYPES_H_
 
 #ifndef bool
 #define bool int
@@ -22,7 +22,7 @@
 #define false 0
 #endif  /* false */
 
-enum
+typedef enum
 {
     KPT_NONE,
     KPT_BASE,
@@ -30,7 +30,7 @@ enum
     KPT_LIST_ELEMENT,
     KPT_UI,
     KPT_MAX
-};
+} KOSP_TYPES;
 
 #endif  /* COM_LUCKYGREENFROG_KOSP_TYPES_H_ */
 

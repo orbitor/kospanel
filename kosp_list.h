@@ -10,6 +10,7 @@
 #ifndef COM_LUCKYGREENFROG_KOSP_LIST_H_
 #define COM_LUCKYGREENFROG_KOSP_LIST_H_
 
+#include "kosp_types.h"
 #include "kosp_base.h"
 
 typedef struct _kosp_list_t kosp_list;
@@ -24,7 +25,8 @@ typedef struct _kosp_list_element_t kosp_list_element;
     KOSP_BASE_MEMBERS_DECLARE \
     kosp_list_element  *_first; \
     kosp_list_element  *_last; \
-    kosp_list_element  *_cache;
+    kosp_list_element  *_cache; \
+    bool                _allow_dups;
 
 #define KOSP_LIST_ELEMENT_MEMBERS_DECLARE \
     KOSP_BASE_MEMBERS_DECLARE \
@@ -32,7 +34,7 @@ typedef struct _kosp_list_element_t kosp_list_element;
     kosp_list_element  *_prev; \
     kosp_base          *_ptr;
 
-kosp_list *kosp_list_create(void);
+kosp_list *kosp_list_create(bool allow_dups);
 kosp_base *kosp_list_first(kosp_list *self);
 kosp_base *kosp_list_last(kosp_list *self);
 kosp_base *kosp_list_next(kosp_list *self, void *ptr);

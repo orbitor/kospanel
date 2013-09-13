@@ -12,7 +12,9 @@
 
 #include <X11/Xlib.h>
 #include <X11/Xutil.h>
+#include "kosp_types.h"
 #include "kosp_base.h"
+#include "kosp_list.h"
 
 /*-------------------------------------------------------------------------*/
 /*-------------------------------------------------------------------------*/
@@ -55,8 +57,11 @@ void kosp_ui_init_palette_with_data(void *vself,
 void kosp_ui_line_draw(void *vself, XSegment segment, int pal_index);
 
 /* virtual functions */
-typedef void (*ui_func_draw) (void *vself);
 typedef void (*ui_func_init_palette) (void *vself);
+typedef void (*ui_func_draw) (void *vself);
+typedef void (*ui_func_resize) (void *vself, XRectangle new_size);
+typedef void (*ui_func_add) (void *vself, void *child, bool add_front);
+typedef kosp_base *(*ui_func_remove) (void *vself, void *child);
 typedef int  (*ui_func_event_button_press) (void *vself, XButtonPressedEvent *event);
 typedef int  (*ui_func_event_button_release) (void *vself, XButtonReleasedEvent *event);
 typedef int  (*ui_func_event_pointer_moved) (void *vself, XPointerMovedEvent *event);
@@ -72,6 +77,8 @@ void kosp_ui_destroy(void *vself);
 void kosp_ui_init_palette(void *vself);
 void kosp_ui_draw(void *vself);
 void kosp_ui_resize(void *vself, XRectangle new_size);
+void kosp_ui_add(void *vself, void *child, bool add_front);
+kosp_base *kosp_ui_remove(void *vself, void *child);
 int kosp_ui_event_button_press(void *vself, XButtonPressedEvent *event);
 int kosp_ui_event_button_release(void *vself, XButtonReleasedEvent *event);
 int kosp_ui_event_pointer_moved(void *vself, XPointerMovedEvent *event);
@@ -88,6 +95,9 @@ int kosp_ui_event_destroy_notify(void *vself, XDestroyWindowEvent *event);
     KOSP_BASE_MEMBERS_DECLARE \
     ui_func_init_palette            init_palette; \
     ui_func_draw                    draw; \
+    ui_func_resize                  resize; \
+    ui_func_add                     add; \
+    ui_func_remove                  remove; \
     ui_func_event_button_press      button_press; \
     ui_func_event_button_release    button_release; \
     ui_func_event_pointer_moved     pointer_moved; \
@@ -98,11 +108,12 @@ int kosp_ui_event_destroy_notify(void *vself, XDestroyWindowEvent *event);
     ui_func_event_expose            expose; \
     ui_func_event_unmap_notify      unmap_notify; \
     ui_func_event_destroy_notify    destroy_notify; \
-    void                           *parent; \
-    Window                          window; \
-    GC                              gc; \
-    XRectangle                      posnsize; \
-    unsigned long                   palette[KU_CLR_MAX];
+    void                           *_parent; \
+    kosp_list                      *_child_list; \
+    Window                          _window; \
+    GC                              _gc; \
+    XRectangle                      _posnsize; \
+    unsigned long                   _palette[KU_CLR_MAX];
 
 struct _kosp_ui_t
 {

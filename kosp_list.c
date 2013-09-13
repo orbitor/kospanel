@@ -9,7 +9,6 @@
 
 #include <string.h>
 #include <stdlib.h>
-#include "kosp_types.h"
 #include "kosp_list.h"
 
 /*-------------------------------------------------------------------------*/
@@ -20,7 +19,7 @@ static kosp_list_element *_kosp_list_element_create(void *ptr);
 
 /*-------------------------------------------------------------------------*/
 /*-------------------------------------------------------------------------*/
-kosp_list *kosp_list_create(void)
+kosp_list *kosp_list_create(bool allow_dups)
 {
     kosp_list *kl = (kosp_list *) malloc(sizeof(kosp_list));
 
@@ -28,6 +27,7 @@ kosp_list *kosp_list_create(void)
     {
         memset(kl, 0, sizeof(kosp_list));
         kosp_base_init((kosp_base *) kl, KPT_LIST);
+        kl->_allow_dups = allow_dups;
     }
 
     return kl;
@@ -113,6 +113,16 @@ bool kosp_list_add(kosp_list *self, void *ptr, bool add_front)
     if (NULL == ptr)
     {
         return false;
+    }
+
+    if (false == self->_allow_dups)
+    {
+        kosp_list_element *dup = _kosp_list_element_find_by_ptr(self, ptr);
+
+        if (NULL != dup)
+        {
+            return false;
+        }
     }
 
     kle = _kosp_list_element_create(ptr);

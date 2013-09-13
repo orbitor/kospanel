@@ -1,12 +1,7 @@
 
 #include <stdlib.h>
 #include <stdio.h>
-#include <X11/Xlib.h>
-#include <X11/Xutil.h>
 
-//#define bool int
-
-#include "kosp_types.h"
 #include "kosp_ui.h"
 
 int main(int argc, char *argv[])
