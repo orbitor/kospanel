@@ -29,13 +29,14 @@ kosp_ui *kosp_ui_create_default(void)
 
 /*-------------------------------------------------------------------------*/
 /*-------------------------------------------------------------------------*/
-kosp_ui *kosp_ui_create(int isa, int width, int height)
+kosp_ui *kosp_ui_create(int isa, void *parent, int x, int y,
+        unsigned int width, unsigned int height)
 {
     kosp_ui *kui = kosp_ui_create_default();
 
-    if (kui)
+    if (NULL != kui)
     {
-        kosp_ui_init(kui, isa, width, height);
+        kosp_ui_init(kui, isa, x, y, width, height);
     }
 
     return kui;
@@ -43,28 +44,22 @@ kosp_ui *kosp_ui_create(int isa, int width, int height)
 
 /*-------------------------------------------------------------------------*/
 /*-------------------------------------------------------------------------*/
-void kosp_ui_init_default(kosp_ui *self)
+void kosp_ui_init(kosp_ui *self, int isa, int x, int y, 
+        unsigned int width, unsigned int height)
 {
-    if (NULL == self)
-    {
-        return;
-    }
-
-    kosp_base_init_default((kosp_base *) self);
+    kosp_base_init((kosp_base *) self, isa);
     kosp_ui_funcs_init(self);
+    kosp_ui_set(self, isa, x, y, width, height);
 }
 
 /*-------------------------------------------------------------------------*/
 /*-------------------------------------------------------------------------*/
-void kosp_ui_init(kosp_ui *self, int isa, int width, int height)
+void kosp_ui_set(kosp_ui *self, int isa, int x, int y,
+        unsigned int width, unsigned int height)
 {
-    if (NULL == self)
-    {
-        return;
-    }
-
-    kosp_base_init((kosp_base *) self, isa);
-    kosp_ui_funcs_init(self);
+    kosp_isa_set(self, isa);
+    self->posnsize.width = width;
+    self->posnsize.height = height;
 }
 
 /*-------------------------------------------------------------------------*/
@@ -72,6 +67,7 @@ void kosp_ui_init(kosp_ui *self, int isa, int width, int height)
 void kosp_ui_funcs_init(kosp_ui *self)
 {
     self->destroy = kosp_ui_destroy;
+    self->init_palette = kosp_ui_init_palette;
     self->draw = kosp_ui_draw;
     self->button_press = kosp_ui_event_button_press;
     self->button_release = kosp_ui_event_button_release;

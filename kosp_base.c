@@ -13,24 +13,20 @@
 
 /*-------------------------------------------------------------------------*/
 /*-------------------------------------------------------------------------*/
-void kosp_base_init_default(kosp_base *self)
+void kosp_base_init(kosp_base *self, int isa)
 {
     if (self)
     {
-        self->destroy = kosp_base_destroy;
-        kosp_isa_set(self, KPT_BASE);
+        kosp_base_funcs_init(self);
+        kosp_isa_set(self, isa);
     }
 }
 
 /*-------------------------------------------------------------------------*/
 /*-------------------------------------------------------------------------*/
-void kosp_base_init(kosp_base *self, int isa)
+void kosp_base_funcs_init(kosp_base *self)
 {
-    if (self)
-    {
-        kosp_base_init_default(self);
-        kosp_isa_set(self, isa);
-    }
+    self->destroy = kosp_base_destroy;
 }
 
 /*-------------------------------------------------------------------------*/

@@ -15,8 +15,8 @@ typedef struct _kosp_base_t kosp_base;
 /*-------------------------------------------------------------------------*/
 /* init functions */
 /*-------------------------------------------------------------------------*/
-void kosp_base_init_default(kosp_base *self);
 void kosp_base_init(kosp_base *self, int isa);
+void kosp_base_funcs_init(kosp_base *self);
 
 /*-------------------------------------------------------------------------*/
 /* type functions */

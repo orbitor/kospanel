@@ -35,9 +35,12 @@ typedef struct _kosp_ui_t kosp_ui;
 
 /* create and init functions */
 kosp_ui *kosp_ui_create_default(void);
-kosp_ui *kosp_ui_create(int isa, int width, int height);
-void kosp_ui_init_default(kosp_ui *self);
-void kosp_ui_init(kosp_ui *self, int isa, int width, int height);
+kosp_ui *kosp_ui_create(int isa, void *parent, int x, int y,
+        unsigned int width, unsigned int height);
+void kosp_ui_init(kosp_ui *self, int isa, int x, int y,
+        unsigned int width, unsigned int height);
+void kosp_ui_set(kosp_ui *self, int isa, int x, int y,
+        unsigned int width, unsigned int height);
 void kosp_ui_funcs_init(kosp_ui *self);
 
 /* type functions */
@@ -95,6 +98,7 @@ int kosp_ui_event_destroy_notify(void *vself, XDestroyWindowEvent *event);
     ui_func_event_expose            expose; \
     ui_func_event_unmap_notify      unmap_notify; \
     ui_func_event_destroy_notify    destroy_notify; \
+    void                           *parent; \
     Window                          window; \
     GC                              gc; \
     XRectangle                      posnsize; \
