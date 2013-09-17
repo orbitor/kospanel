@@ -1,5 +1,5 @@
 /*-------------------------------------------------------------------------*/
-/* kosp_list.h
+/* kosp_list.c
  *
  * This module is part of kospanel
  * Copyright (c) 2013, James DeLisle    <jd@luckygreenfrog.com>
@@ -13,13 +13,13 @@
 
 /*-------------------------------------------------------------------------*/
 /*-------------------------------------------------------------------------*/
+static kosp_list_element *_kosp_list_element_create(void *ptr);
 static kosp_list_element *_kosp_list_element_find_by_ptr(
         kosp_list *self, void *ptr);
-static kosp_list_element *_kosp_list_element_create(void *ptr);
 
 /*-------------------------------------------------------------------------*/
 /*-------------------------------------------------------------------------*/
-kosp_list *kosp_list_create(bool allow_dups)
+kosp_list *kosp_list_create(bool allow_dups, bool owns_entries)
 {
     kosp_list *kl = (kosp_list *) malloc(sizeof(kosp_list));
 
@@ -27,7 +27,9 @@ kosp_list *kosp_list_create(bool allow_dups)
     {
         memset(kl, 0, sizeof(kosp_list));
         kosp_base_init((kosp_base *) kl, KPT_LIST);
+        kl->destroy = kosp_list_destroy;
         kl->_allow_dups = allow_dups;
+        kl->_owns_entries = owns_entries;
     }
 
     return kl;
@@ -194,6 +196,62 @@ kosp_base *kosp_list_remove(kosp_list *self, void *ptr)
 }
 
 /*-------------------------------------------------------------------------*/
+/* virtual functions */
+/*-------------------------------------------------------------------------*/
+void kosp_list_destroy(void *vself)
+{
+    kosp_list *self = (kosp_list *) vself;
+    kosp_list_element *element;
+    kosp_list_element *next;
+    kosp_base *ptr = NULL;
+
+    if (NULL == self)
+    {
+        return;
+    }
+
+    element = self->_first;
+
+    while(element)
+    {
+        next = element->_next;
+
+        if (self->_owns_entries)
+        {
+            ptr = element->_ptr;
+        }
+
+        element->destroy(element);
+
+        if (NULL != ptr)
+        {
+            ptr->destroy(ptr);
+        }
+
+        element = next;
+    }
+
+    kosp_base_destroy(self);
+}
+
+/*-------------------------------------------------------------------------*/
+/* static functions */
+/*-------------------------------------------------------------------------*/
+static kosp_list_element *_kosp_list_element_create(void *ptr)
+{
+    kosp_list_element *kle = 
+        (kosp_list_element *) malloc(sizeof(kosp_list_element));
+
+    if (kle)
+    {
+        memset(kle, 0, sizeof(kosp_list_element));
+        kosp_base_init((kosp_base *) kle, KPT_LIST_ELEMENT);
+    }
+
+    return kle;
+}
+
+/*-------------------------------------------------------------------------*/
 /*-------------------------------------------------------------------------*/
 static kosp_list_element *_kosp_list_element_find_by_ptr(
         kosp_list *self, void *ptr)
@@ -211,21 +269,5 @@ static kosp_list_element *_kosp_list_element_find_by_ptr(
     }
 
     return NULL;
-}
-
-/*-------------------------------------------------------------------------*/
-/*-------------------------------------------------------------------------*/
-static kosp_list_element *_kosp_list_element_create(void *ptr)
-{
-    kosp_list_element *kle = 
-        (kosp_list_element *) malloc(sizeof(kosp_list_element));
-
-    if (kle)
-    {
-        memset(kle, 0, sizeof(kosp_list_element));
-        kosp_base_init((kosp_base *) kle, KPT_LIST_ELEMENT);
-    }
-
-    return kle;
 }
 

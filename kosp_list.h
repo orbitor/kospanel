@@ -13,6 +13,9 @@
 #include "kosp_types.h"
 #include "kosp_base.h"
 
+/*-------------------------------------------------------------------------*/
+/* typedef */
+/*-------------------------------------------------------------------------*/
 typedef struct _kosp_list_t kosp_list;
 typedef struct _kosp_list_element_t kosp_list_element;
 
@@ -21,25 +24,37 @@ typedef struct _kosp_list_element_t kosp_list_element;
  * typedef int (*list_sort_callback) (const void *left, const void *right);
  */
 
+/*-------------------------------------------------------------------------*/
+/* type functions */
+/*-------------------------------------------------------------------------*/
+kosp_list *kosp_list_create(bool allow_dups, bool owns_entries);
+kosp_base *kosp_list_first(kosp_list *self);
+kosp_base *kosp_list_last(kosp_list *self);
+kosp_base *kosp_list_next(kosp_list *self, void *ptr);
+bool       kosp_list_add(kosp_list *self, void *ptr, bool add_front);
+kosp_base *kosp_list_remove(kosp_list *self, void *ptr);
+
+/*-------------------------------------------------------------------------*/
+/* virtual functions */
+/*-------------------------------------------------------------------------*/
+void       kosp_list_destroy(void *vself);
+
+/*-------------------------------------------------------------------------*/
+/* type declarations */
+/*-------------------------------------------------------------------------*/
 #define KOSP_LIST_MEMBERS_DECLARE \
     KOSP_BASE_MEMBERS_DECLARE \
     kosp_list_element  *_first; \
     kosp_list_element  *_last; \
     kosp_list_element  *_cache; \
-    bool                _allow_dups;
+    bool                _allow_dups; \
+    bool                _owns_entries;
 
 #define KOSP_LIST_ELEMENT_MEMBERS_DECLARE \
     KOSP_BASE_MEMBERS_DECLARE \
     kosp_list_element  *_next; \
     kosp_list_element  *_prev; \
     kosp_base          *_ptr;
-
-kosp_list *kosp_list_create(bool allow_dups);
-kosp_base *kosp_list_first(kosp_list *self);
-kosp_base *kosp_list_last(kosp_list *self);
-kosp_base *kosp_list_next(kosp_list *self, void *ptr);
-bool       kosp_list_add(kosp_list *self, void *ptr, bool add_front);
-kosp_base *kosp_list_remove(kosp_list *self, void *ptr);
 
 struct _kosp_list_t
 {

@@ -12,7 +12,6 @@ int main(int argc, char *argv[])
             __func__,
             (unsigned int) kui);
 
-
     kui->destroy(kui);
 
     return 0;

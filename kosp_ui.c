@@ -49,7 +49,7 @@ void kosp_ui_init(kosp_ui *self, int isa, int x, int y,
     kosp_ui_funcs_init(self);
     kosp_ui_set(self, isa, x, y, width, height);
 
-    self->_child_list = kosp_list_create(false);
+    self->_child_list = kosp_list_create(false, true);
 }
 
 /*-------------------------------------------------------------------------*/
@@ -139,9 +139,25 @@ void kosp_ui_line_draw(void *vself, XSegment segment, int pal_index)
 /*-------------------------------------------------------------------------*/
 void kosp_ui_destroy(void *vself)
 {
+    kosp_list *cl = NULL;
+
+    if (NULL == vself)
+    {
+        return;
+    }
+
+    cl = ((kosp_ui *) vself)->_child_list;
+
+    if (NULL != cl)
+    {
+        cl->destroy(cl);
+    }
+
     kosp_base_destroy(vself);
 }
 
+/*-------------------------------------------------------------------------*/
+/*-------------------------------------------------------------------------*/
 void kosp_ui_init_palette(void *vself)
 {
 }
@@ -154,13 +170,31 @@ void kosp_ui_resize(void *vself, XRectangle new_size)
 {
 }
 
+/*-------------------------------------------------------------------------*/
+/*-------------------------------------------------------------------------*/
 void kosp_ui_add(void *vself, void *child, bool add_front)
 {
+    if (NULL == vself || NULL == child)
+    {
+        return;
+    }
+
+    kosp_list_add(((kosp_ui *) vself)->_child_list, child, add_front);
 }
 
+/*-------------------------------------------------------------------------*/
+/*-------------------------------------------------------------------------*/
 kosp_base *kosp_ui_remove(void *vself, void *child)
 {
-    return NULL;
+    kosp_base *retval = NULL;
+
+    if (NULL == vself || NULL == child)
+    {
+        return NULL;
+    }
+
+    retval = kosp_list_remove(((kosp_ui *) vself)->_child_list, child);
+    return retval;
 }
 
 int kosp_ui_event_button_press(void *vself, XButtonPressedEvent *event)
