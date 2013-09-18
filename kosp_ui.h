@@ -59,6 +59,7 @@ void kosp_ui_line_draw(void *vself, XSegment segment, int pal_index);
 /* virtual functions */
 typedef void (*ui_func_init_palette) (void *vself);
 typedef void (*ui_func_draw) (void *vself);
+typedef void (*ui_func_draw_children) (void *vself);
 typedef void (*ui_func_resize) (void *vself, XRectangle new_size);
 typedef void (*ui_func_add) (void *vself, void *child, bool add_front);
 typedef kosp_base *(*ui_func_remove) (void *vself, void *child);
@@ -76,6 +77,7 @@ typedef int  (*ui_func_event_destroy_notify) (void *vself, XDestroyWindowEvent *
 void kosp_ui_destroy(void *vself);
 void kosp_ui_init_palette(void *vself);
 void kosp_ui_draw(void *vself);
+void kosp_ui_draw_children(void *vself);
 void kosp_ui_resize(void *vself, XRectangle new_size);
 void kosp_ui_add(void *vself, void *child, bool add_front);
 kosp_base *kosp_ui_remove(void *vself, void *child);
@@ -95,6 +97,7 @@ int kosp_ui_event_destroy_notify(void *vself, XDestroyWindowEvent *event);
     KOSP_BASE_MEMBERS_DECLARE \
     ui_func_init_palette            init_palette; \
     ui_func_draw                    draw; \
+    ui_func_draw_children           draw_children; \
     ui_func_resize                  resize; \
     ui_func_add                     add; \
     ui_func_remove                  remove; \

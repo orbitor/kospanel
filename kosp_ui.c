@@ -69,6 +69,7 @@ void kosp_ui_funcs_init(kosp_ui *self)
     self->destroy = kosp_ui_destroy;
     self->init_palette = kosp_ui_init_palette;
     self->draw = kosp_ui_draw;
+    self->draw_children = kosp_ui_draw_children;
     self->resize = kosp_ui_resize;
     self->add = kosp_ui_add;
     self->remove = kosp_ui_remove;
@@ -163,6 +164,10 @@ void kosp_ui_init_palette(void *vself)
 }
 
 void kosp_ui_draw(void *vself)
+{
+}
+
+void kosp_ui_draw_children(void *vself)
 {
 }
 
