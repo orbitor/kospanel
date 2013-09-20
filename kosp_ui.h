@@ -35,7 +35,9 @@ enum
 /*-------------------------------------------------------------------------*/
 typedef struct _kosp_ui_t kosp_ui;
 
+/*-------------------------------------------------------------------------*/
 /* create and init functions */
+/*-------------------------------------------------------------------------*/
 kosp_ui *kosp_ui_create_default(void);
 kosp_ui *kosp_ui_create(int isa, void *parent, int x, int y,
         unsigned int width, unsigned int height);
@@ -45,7 +47,9 @@ void kosp_ui_set(kosp_ui *self, int isa, int x, int y,
         unsigned int width, unsigned int height);
 void kosp_ui_funcs_init(kosp_ui *self);
 
+/*-------------------------------------------------------------------------*/
 /* type functions */
+/*-------------------------------------------------------------------------*/
 int kosp_ui_width(void *vself);
 int kosp_ui_height(void *vself);
 Window kosp_ui_window(void *vself);
@@ -56,7 +60,9 @@ void kosp_ui_init_palette_with_data(void *vself,
 
 void kosp_ui_line_draw(void *vself, XSegment segment, int pal_index);
 
+/*-------------------------------------------------------------------------*/
 /* virtual functions */
+/*-------------------------------------------------------------------------*/
 typedef void (*ui_func_init_palette) (void *vself);
 typedef void (*ui_func_draw) (void *vself);
 typedef void (*ui_func_draw_children) (void *vself);
@@ -92,7 +98,9 @@ int kosp_ui_event_expose(void *vself, XExposeEvent *event);
 int kosp_ui_event_unmap_notify(void *vself, XUnmapEvent *event);
 int kosp_ui_event_destroy_notify(void *vself, XDestroyWindowEvent *event);
 
+/*-------------------------------------------------------------------------*/
 /* type declaration */
+/*-------------------------------------------------------------------------*/
 #define KOSP_UI_MEMBERS_DECLARE \
     KOSP_BASE_MEMBERS_DECLARE \
     ui_func_init_palette            init_palette; \
@@ -122,7 +130,6 @@ struct _kosp_ui_t
 {
     KOSP_UI_MEMBERS_DECLARE
 };
-    
 
 #endif  /* COM_LUCKYGREENFROG_KOSP_UI_H_ */
 
