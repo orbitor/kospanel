@@ -11,6 +11,7 @@
 #define COM_LUCKYGREENFROG_KOSP_X11_H_
 
 #include <X11/Xlib.h>
+#include <X11/extensions/Xinerama.h>
 #include "kosp_types.h"
 
 /*-------------------------------------------------------------------------*/
@@ -20,7 +21,9 @@ struct _kosp_x11_t
 {
     Display *_display;
     Visual *_visual;
+    XineramaScreenInfo *_xinerama_info;
     Window _root_window;
+    Colormap _colormap;
     int _screen;
     int _color_depth;
     int _error_code;
@@ -35,6 +38,7 @@ void kosp_x11_shutdown(void);
 Display *kosp_x11_display(void);
 Window kosp_x11_root_window(void);
 int kosp_x11_color_depth(void);
+Colormap kosp_x11_colormap(void);
 int kosp_x11_screen(void);
 Visual *kosp_x11_visual(void);
 void kosp_x11_get_last_x_error(int *error_code, int *request_code);

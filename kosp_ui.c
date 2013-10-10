@@ -9,6 +9,7 @@
 
 #include <stdlib.h>
 #include <string.h>
+#include "kosp_x11.h"
 #include "kosp_ui.h"
 
 /*-------------------------------------------------------------------------*/
@@ -30,11 +31,26 @@ kosp_ui *kosp_ui_create_default(void)
 kosp_ui *kosp_ui_create(int isa, void *parent, int x, int y,
         unsigned int width, unsigned int height)
 {
+    Window xparent = None;
     kosp_ui *kui = kosp_ui_create_default();
 
     if (NULL != kui)
     {
         kosp_ui_init(kui, isa, x, y, width, height);
+
+        if (NULL != parent)
+        {
+            xparent = ((kosp_ui *) parent)->_window;
+        }
+
+        if (None == xparent)
+        {
+            kui->_window = kosp_x11_create_toplevel_window();
+        }
+        else
+        {
+            kui->_window = kosp_x11_create_child_window(xparent);
+        }
     }
 
     return kui;
@@ -50,6 +66,8 @@ void kosp_ui_init(kosp_ui *self, int isa, int x, int y,
     kosp_ui_set(self, isa, x, y, width, height);
 
     self->_child_list = kosp_list_create(false, true);
+
+    self->_window = None;
 }
 
 /*-------------------------------------------------------------------------*/
@@ -140,18 +158,24 @@ void kosp_ui_line_draw(void *vself, XSegment segment, int pal_index)
 /*-------------------------------------------------------------------------*/
 void kosp_ui_destroy(void *vself)
 {
-    kosp_list *cl = NULL;
+    kosp_ui *kui = NULL;
 
     if (NULL == vself)
     {
         return;
     }
 
-    cl = ((kosp_ui *) vself)->_child_list;
+    kui = (kosp_ui *) vself;
 
-    if (NULL != cl)
+    if (NULL != kui->_child_list)
     {
-        cl->destroy(cl);
+        kui->_child_list->destroy(kui->_child_list);
+        kui->_child_list = NULL;
+    }
+
+    if (None != kui->_window)
+    {
+        kosp_x11_destroy_window(kui->_window);
     }
 
     kosp_base_destroy(vself);
