@@ -13,20 +13,20 @@
 
 /*-------------------------------------------------------------------------*/
 /*-------------------------------------------------------------------------*/
-static kosp_list_element *_kosp_list_element_create(void *ptr);
-static kosp_list_element *_kosp_list_element_find_by_ptr(
-        kosp_list *self, void *ptr);
+static kosp_list_element_t *_kosp_list_element_create(void *ptr);
+static kosp_list_element_t *_kosp_list_element_find_by_ptr(
+        kosp_list_t *self, void *ptr);
 
 /*-------------------------------------------------------------------------*/
 /*-------------------------------------------------------------------------*/
-kosp_list *kosp_list_create(bool allow_dups, bool owns_entries)
+kosp_list_t *kosp_list_create(bool allow_dups, bool owns_entries)
 {
-    kosp_list *kl = (kosp_list *) malloc(sizeof(kosp_list));
+    kosp_list_t *kl = (kosp_list_t *) malloc(sizeof(kosp_list_t));
 
     if (NULL != kl)
     {
-        memset(kl, 0, sizeof(kosp_list));
-        kosp_base_init((kosp_base *) kl, KPT_LIST);
+        memset(kl, 0, sizeof(kosp_list_t));
+        kosp_base_init((kosp_base_t *) kl, KPT_LIST);
         kl->destroy = kosp_list_destroy;
         kl->_allow_dups = allow_dups;
         kl->_owns_entries = owns_entries;
@@ -37,7 +37,7 @@ kosp_list *kosp_list_create(bool allow_dups, bool owns_entries)
 
 /*-------------------------------------------------------------------------*/
 /*-------------------------------------------------------------------------*/
-kosp_base *kosp_list_first(kosp_list *self)
+kosp_base_t *kosp_list_first(kosp_list_t *self)
 {
     if (NULL != self->_first)
     {
@@ -50,7 +50,7 @@ kosp_base *kosp_list_first(kosp_list *self)
 
 /*-------------------------------------------------------------------------*/
 /*-------------------------------------------------------------------------*/
-kosp_base *kosp_list_last(kosp_list *self)
+kosp_base_t *kosp_list_last(kosp_list_t *self)
 {
     if (NULL != self->_last)
     {
@@ -62,7 +62,7 @@ kosp_base *kosp_list_last(kosp_list *self)
 
 /*-------------------------------------------------------------------------*/
 /*-------------------------------------------------------------------------*/
-kosp_base *kosp_list_next(kosp_list *self, void *ptr)
+kosp_base_t *kosp_list_next(kosp_list_t *self, void *ptr)
 {
     if (NULL == self->_first || NULL == ptr)
     {
@@ -82,7 +82,7 @@ kosp_base *kosp_list_next(kosp_list *self, void *ptr)
     }
     else
     {
-        kosp_list_element *kle = self->_first;
+        kosp_list_element_t *kle = self->_first;
 
         while(kle)
         {
@@ -108,9 +108,9 @@ kosp_base *kosp_list_next(kosp_list *self, void *ptr)
 
 /*-------------------------------------------------------------------------*/
 /*-------------------------------------------------------------------------*/
-bool kosp_list_add(kosp_list *self, void *ptr, bool add_front)
+bool kosp_list_add(kosp_list_t *self, void *ptr, bool add_front)
 {
-    kosp_list_element *kle = NULL;
+    kosp_list_element_t *kle = NULL;
 
     if (NULL == ptr)
     {
@@ -119,7 +119,7 @@ bool kosp_list_add(kosp_list *self, void *ptr, bool add_front)
 
     if (false == self->_allow_dups)
     {
-        kosp_list_element *dup = _kosp_list_element_find_by_ptr(self, ptr);
+        kosp_list_element_t *dup = _kosp_list_element_find_by_ptr(self, ptr);
 
         if (NULL != dup)
         {
@@ -160,10 +160,10 @@ bool kosp_list_add(kosp_list *self, void *ptr, bool add_front)
 
 /*-------------------------------------------------------------------------*/
 /*-------------------------------------------------------------------------*/
-kosp_base *kosp_list_remove(kosp_list *self, void *ptr)
+kosp_base_t *kosp_list_remove(kosp_list_t *self, void *ptr)
 {
-    kosp_list_element *kle = _kosp_list_element_find_by_ptr(self, ptr);
-    kosp_base *retptr = NULL;
+    kosp_list_element_t *kle = _kosp_list_element_find_by_ptr(self, ptr);
+    kosp_base_t *retptr = NULL;
 
     if (kle)
     {
@@ -200,10 +200,10 @@ kosp_base *kosp_list_remove(kosp_list *self, void *ptr)
 /*-------------------------------------------------------------------------*/
 void kosp_list_destroy(void *vself)
 {
-    kosp_list *self = (kosp_list *) vself;
-    kosp_list_element *element;
-    kosp_list_element *next;
-    kosp_base *ptr = NULL;
+    kosp_list_t *self = (kosp_list_t *) vself;
+    kosp_list_element_t *element;
+    kosp_list_element_t *next;
+    kosp_base_t *ptr = NULL;
 
     if (NULL == self)
     {
@@ -237,15 +237,15 @@ void kosp_list_destroy(void *vself)
 /*-------------------------------------------------------------------------*/
 /* static functions */
 /*-------------------------------------------------------------------------*/
-static kosp_list_element *_kosp_list_element_create(void *ptr)
+static kosp_list_element_t *_kosp_list_element_create(void *ptr)
 {
-    kosp_list_element *kle = 
-        (kosp_list_element *) malloc(sizeof(kosp_list_element));
+    kosp_list_element_t *kle = 
+        (kosp_list_element_t *) malloc(sizeof(kosp_list_element_t));
 
     if (kle)
     {
-        memset(kle, 0, sizeof(kosp_list_element));
-        kosp_base_init((kosp_base *) kle, KPT_LIST_ELEMENT);
+        memset(kle, 0, sizeof(kosp_list_element_t));
+        kosp_base_init((kosp_base_t *) kle, KPT_LIST_ELEMENT);
     }
 
     return kle;
@@ -253,10 +253,10 @@ static kosp_list_element *_kosp_list_element_create(void *ptr)
 
 /*-------------------------------------------------------------------------*/
 /*-------------------------------------------------------------------------*/
-static kosp_list_element *_kosp_list_element_find_by_ptr(
-        kosp_list *self, void *ptr)
+static kosp_list_element_t *_kosp_list_element_find_by_ptr(
+        kosp_list_t *self, void *ptr)
 {
-    kosp_list_element *kle = self->_first;
+    kosp_list_element_t *kle = self->_first;
 
     while(kle)
     {

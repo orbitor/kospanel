@@ -16,22 +16,6 @@
 
 /*-------------------------------------------------------------------------*/
 /*-------------------------------------------------------------------------*/
-typedef struct _kosp_x11_t kosp_x11_t;
-struct _kosp_x11_t
-{
-    Display *_display;
-    Visual *_visual;
-    XineramaScreenInfo *_xinerama_info;
-    Window _root_window;
-    Colormap _colormap;
-    int _screen;
-    int _color_depth;
-    int _error_code;
-    int _request_code;
-};
-
-/*-------------------------------------------------------------------------*/
-/*-------------------------------------------------------------------------*/
 bool kosp_x11_init(void);
 void kosp_x11_shutdown(void);
 

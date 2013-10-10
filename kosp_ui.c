@@ -14,13 +14,13 @@
 
 /*-------------------------------------------------------------------------*/
 /*-------------------------------------------------------------------------*/
-kosp_ui *kosp_ui_create_default(void)
+kosp_ui_t *kosp_ui_create_default(void)
 {
-    kosp_ui *kui = (kosp_ui *) malloc(sizeof(kosp_ui));
+    kosp_ui_t *kui = (kosp_ui_t *) malloc(sizeof(kosp_ui_t));
 
     if (NULL != kui)
     {
-        memset(kui, 0, sizeof(kosp_ui));
+        memset(kui, 0, sizeof(kosp_ui_t));
     }
 
     return kui;
@@ -28,11 +28,11 @@ kosp_ui *kosp_ui_create_default(void)
 
 /*-------------------------------------------------------------------------*/
 /*-------------------------------------------------------------------------*/
-kosp_ui *kosp_ui_create(int isa, void *parent, int x, int y,
+kosp_ui_t *kosp_ui_create(int isa, void *parent, int x, int y,
         unsigned int width, unsigned int height)
 {
     Window xparent = None;
-    kosp_ui *kui = kosp_ui_create_default();
+    kosp_ui_t *kui = kosp_ui_create_default();
 
     if (NULL != kui)
     {
@@ -40,7 +40,7 @@ kosp_ui *kosp_ui_create(int isa, void *parent, int x, int y,
 
         if (NULL != parent)
         {
-            xparent = ((kosp_ui *) parent)->_window;
+            xparent = ((kosp_ui_t *) parent)->_window;
         }
 
         if (None == xparent)
@@ -58,10 +58,10 @@ kosp_ui *kosp_ui_create(int isa, void *parent, int x, int y,
 
 /*-------------------------------------------------------------------------*/
 /*-------------------------------------------------------------------------*/
-void kosp_ui_init(kosp_ui *self, int isa, int x, int y, 
+void kosp_ui_init(kosp_ui_t *self, int isa, int x, int y, 
         unsigned int width, unsigned int height)
 {
-    kosp_base_init((kosp_base *) self, isa);
+    kosp_base_init((kosp_base_t *) self, isa);
     kosp_ui_funcs_init(self);
     kosp_ui_set(self, isa, x, y, width, height);
 
@@ -72,7 +72,7 @@ void kosp_ui_init(kosp_ui *self, int isa, int x, int y,
 
 /*-------------------------------------------------------------------------*/
 /*-------------------------------------------------------------------------*/
-void kosp_ui_set(kosp_ui *self, int isa, int x, int y,
+void kosp_ui_set(kosp_ui_t *self, int isa, int x, int y,
         unsigned int width, unsigned int height)
 {
     kosp_isa_set(self, isa);
@@ -82,7 +82,7 @@ void kosp_ui_set(kosp_ui *self, int isa, int x, int y,
 
 /*-------------------------------------------------------------------------*/
 /*-------------------------------------------------------------------------*/
-void kosp_ui_funcs_init(kosp_ui *self)
+void kosp_ui_funcs_init(kosp_ui_t *self)
 {
     self->destroy = kosp_ui_destroy;
     self->init_palette = kosp_ui_init_palette;
@@ -109,7 +109,7 @@ int kosp_ui_width(void *vself)
 {
     if (vself)
     {
-        return ((kosp_ui *) vself)->_posnsize.width;
+        return ((kosp_ui_t *) vself)->_posnsize.width;
     }
 
     return -1;
@@ -121,7 +121,7 @@ int kosp_ui_height(void *vself)
 {
     if (vself)
     {
-        return ((kosp_ui *) vself)->_posnsize.height;
+        return ((kosp_ui_t *) vself)->_posnsize.height;
     }
 
     return -1;
@@ -133,7 +133,7 @@ Window kosp_ui_window(void *vself)
 {
     if (vself)
     {
-        return ((kosp_ui *) vself)->_window;
+        return ((kosp_ui_t *) vself)->_window;
     }
 
     return None;
@@ -158,14 +158,14 @@ void kosp_ui_line_draw(void *vself, XSegment segment, int pal_index)
 /*-------------------------------------------------------------------------*/
 void kosp_ui_destroy(void *vself)
 {
-    kosp_ui *kui = NULL;
+    kosp_ui_t *kui = NULL;
 
     if (NULL == vself)
     {
         return;
     }
 
-    kui = (kosp_ui *) vself;
+    kui = (kosp_ui_t *) vself;
 
     if (NULL != kui->_child_list)
     {
@@ -208,21 +208,21 @@ void kosp_ui_add(void *vself, void *child, bool add_front)
         return;
     }
 
-    kosp_list_add(((kosp_ui *) vself)->_child_list, child, add_front);
+    kosp_list_add(((kosp_ui_t *) vself)->_child_list, child, add_front);
 }
 
 /*-------------------------------------------------------------------------*/
 /*-------------------------------------------------------------------------*/
-kosp_base *kosp_ui_remove(void *vself, void *child)
+kosp_base_t *kosp_ui_remove(void *vself, void *child)
 {
-    kosp_base *retval = NULL;
+    kosp_base_t *retval = NULL;
 
     if (NULL == vself || NULL == child)
     {
         return NULL;
     }
 
-    retval = kosp_list_remove(((kosp_ui *) vself)->_child_list, child);
+    retval = kosp_list_remove(((kosp_ui_t *) vself)->_child_list, child);
     return retval;
 }
 

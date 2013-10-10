@@ -34,19 +34,19 @@ enum
 
 /*-------------------------------------------------------------------------*/
 /*-------------------------------------------------------------------------*/
-typedef struct _kosp_ui_t kosp_ui;
+typedef struct _kosp_ui_t kosp_ui_t;
 
 /*-------------------------------------------------------------------------*/
 /* create and init functions */
 /*-------------------------------------------------------------------------*/
-kosp_ui *kosp_ui_create_default(void);
-kosp_ui *kosp_ui_create(int isa, void *parent, int x, int y,
+kosp_ui_t *kosp_ui_create_default(void);
+kosp_ui_t *kosp_ui_create(int isa, void *parent, int x, int y,
         unsigned int width, unsigned int height);
-void kosp_ui_init(kosp_ui *self, int isa, int x, int y,
+void kosp_ui_init(kosp_ui_t *self, int isa, int x, int y,
         unsigned int width, unsigned int height);
-void kosp_ui_set(kosp_ui *self, int isa, int x, int y,
+void kosp_ui_set(kosp_ui_t *self, int isa, int x, int y,
         unsigned int width, unsigned int height);
-void kosp_ui_funcs_init(kosp_ui *self);
+void kosp_ui_funcs_init(kosp_ui_t *self);
 
 /*-------------------------------------------------------------------------*/
 /* type functions */
@@ -69,7 +69,7 @@ typedef void (*ui_func_draw) (void *vself);
 typedef void (*ui_func_draw_children) (void *vself);
 typedef void (*ui_func_resize) (void *vself, XRectangle new_size);
 typedef void (*ui_func_add) (void *vself, void *child, bool add_front);
-typedef kosp_base *(*ui_func_remove) (void *vself, void *child);
+typedef kosp_base_t *(*ui_func_remove) (void *vself, void *child);
 typedef int  (*ui_func_event_button_press) (void *vself, XButtonPressedEvent *event);
 typedef int  (*ui_func_event_button_release) (void *vself, XButtonReleasedEvent *event);
 typedef int  (*ui_func_event_pointer_moved) (void *vself, XPointerMovedEvent *event);
@@ -87,7 +87,7 @@ void kosp_ui_draw(void *vself);
 void kosp_ui_draw_children(void *vself);
 void kosp_ui_resize(void *vself, XRectangle new_size);
 void kosp_ui_add(void *vself, void *child, bool add_front);
-kosp_base *kosp_ui_remove(void *vself, void *child);
+kosp_base_t *kosp_ui_remove(void *vself, void *child);
 int kosp_ui_event_button_press(void *vself, XButtonPressedEvent *event);
 int kosp_ui_event_button_release(void *vself, XButtonReleasedEvent *event);
 int kosp_ui_event_pointer_moved(void *vself, XPointerMovedEvent *event);
@@ -121,7 +121,7 @@ int kosp_ui_event_destroy_notify(void *vself, XDestroyWindowEvent *event);
     ui_func_event_unmap_notify      unmap_notify; \
     ui_func_event_destroy_notify    destroy_notify; \
     void                           *_parent; \
-    kosp_list                      *_child_list; \
+    kosp_list_t                    *_child_list; \
     Window                          _window; \
     GC                              _gc; \
     XRectangle                      _posnsize; \

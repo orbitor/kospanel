@@ -13,7 +13,7 @@
 
 /*-------------------------------------------------------------------------*/
 /*-------------------------------------------------------------------------*/
-void kosp_base_init(kosp_base *self, int isa)
+void kosp_base_init(kosp_base_t *self, int isa)
 {
     if (self)
     {
@@ -24,7 +24,7 @@ void kosp_base_init(kosp_base *self, int isa)
 
 /*-------------------------------------------------------------------------*/
 /*-------------------------------------------------------------------------*/
-void kosp_base_funcs_init(kosp_base *self)
+void kosp_base_funcs_init(kosp_base_t *self)
 {
     self->destroy = kosp_base_destroy;
 }
@@ -44,7 +44,7 @@ void kosp_base_destroy(void *vself)
 /*-------------------------------------------------------------------------*/
 int kosp_isa(void *vself)
 {
-    return ((kosp_base *) vself)->isa;
+    return ((kosp_base_t *) vself)->isa;
 }
 
 /*-------------------------------------------------------------------------*/
@@ -53,7 +53,7 @@ void kosp_isa_set(void *vself, int isa)
 {
     if (NULL != vself)
     {
-        ((kosp_base *) vself)->isa = isa;
+        ((kosp_base_t *) vself)->isa = isa;
     }
 }
 

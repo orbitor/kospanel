@@ -29,6 +29,7 @@ typedef enum
     KPT_LIST,
     KPT_LIST_ELEMENT,
     KPT_UI,
+    KPT_PANEL,
     KPT_MAX
 } KOSP_TYPES;
 

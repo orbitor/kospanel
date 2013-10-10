@@ -9,7 +9,7 @@ int main(int argc, char *argv[])
 {
     kosp_x11_init();
 
-    kosp_ui *kui = kosp_ui_create(KPT_UI, NULL, 10, 20, 100, 200);
+    kosp_ui_t *kui = kosp_ui_create(KPT_UI, NULL, 10, 20, 100, 200);
 
     printf("%s\tkui 0x%08x\n",
             __func__,

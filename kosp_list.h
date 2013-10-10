@@ -16,8 +16,8 @@
 /*-------------------------------------------------------------------------*/
 /* typedef */
 /*-------------------------------------------------------------------------*/
-typedef struct _kosp_list_t kosp_list;
-typedef struct _kosp_list_element_t kosp_list_element;
+typedef struct _kosp_list_t kosp_list_t;
+typedef struct _kosp_list_element_t kosp_list_element_t;
 
 /*
  * typedef bool (*list_find_callback) (const void *ptr);
@@ -27,12 +27,12 @@ typedef struct _kosp_list_element_t kosp_list_element;
 /*-------------------------------------------------------------------------*/
 /* type functions */
 /*-------------------------------------------------------------------------*/
-kosp_list *kosp_list_create(bool allow_dups, bool owns_entries);
-kosp_base *kosp_list_first(kosp_list *self);
-kosp_base *kosp_list_last(kosp_list *self);
-kosp_base *kosp_list_next(kosp_list *self, void *ptr);
-bool       kosp_list_add(kosp_list *self, void *ptr, bool add_front);
-kosp_base *kosp_list_remove(kosp_list *self, void *ptr);
+kosp_list_t *kosp_list_create(bool allow_dups, bool owns_entries);
+kosp_base_t *kosp_list_first(kosp_list_t*self);
+kosp_base_t *kosp_list_last(kosp_list_t*self);
+kosp_base_t *kosp_list_next(kosp_list_t*self, void *ptr);
+bool         kosp_list_add(kosp_list_t*self, void *ptr, bool add_front);
+kosp_base_t *kosp_list_remove(kosp_list_t*self, void *ptr);
 
 /*-------------------------------------------------------------------------*/
 /* virtual functions */
@@ -44,17 +44,17 @@ void       kosp_list_destroy(void *vself);
 /*-------------------------------------------------------------------------*/
 #define KOSP_LIST_MEMBERS_DECLARE \
     KOSP_BASE_MEMBERS_DECLARE \
-    kosp_list_element  *_first; \
-    kosp_list_element  *_last; \
-    kosp_list_element  *_cache; \
-    bool                _allow_dups; \
-    bool                _owns_entries;
+    kosp_list_element_t *_first; \
+    kosp_list_element_t *_last; \
+    kosp_list_element_t *_cache; \
+    bool                 _allow_dups; \
+    bool                 _owns_entries;
 
 #define KOSP_LIST_ELEMENT_MEMBERS_DECLARE \
     KOSP_BASE_MEMBERS_DECLARE \
-    kosp_list_element  *_next; \
-    kosp_list_element  *_prev; \
-    kosp_base          *_ptr;
+    kosp_list_element_t *_next; \
+    kosp_list_element_t *_prev; \
+    kosp_base_t         *_ptr;
 
 struct _kosp_list_t
 {
