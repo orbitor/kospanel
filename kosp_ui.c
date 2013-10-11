@@ -65,9 +65,8 @@ void kosp_ui_init(kosp_ui_t *self, int isa, int x, int y,
     kosp_ui_funcs_init(self);
     kosp_ui_set(self, isa, x, y, width, height);
 
-    self->_child_list = kosp_list_create(false, true);
-
     self->_window = None;
+    self->_child_list = kosp_list_create(false, true);
 }
 
 /*-------------------------------------------------------------------------*/

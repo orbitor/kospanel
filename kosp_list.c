@@ -12,6 +12,11 @@
 #include "kosp_list.h"
 
 /*-------------------------------------------------------------------------*/
+/* virtual functions */
+/*-------------------------------------------------------------------------*/
+static void kosp_list_destroy(void *vself);
+
+/*-------------------------------------------------------------------------*/
 /*-------------------------------------------------------------------------*/
 static kosp_list_element_t *_kosp_list_element_create(void *ptr);
 static kosp_list_element_t *_kosp_list_element_find_by_ptr(
@@ -196,9 +201,24 @@ kosp_base_t *kosp_list_remove(kosp_list_t *self, void *ptr)
 }
 
 /*-------------------------------------------------------------------------*/
+/*-------------------------------------------------------------------------*/
+bool kosp_list_find(kosp_list_t *self, void *compare_data)
+{
+
+}
+
+/*-------------------------------------------------------------------------*/
+/*-------------------------------------------------------------------------*/
+void kosp_list_set_find_callback(kosp_list_t *self,
+        kosp_list_find_callback cb_function)
+{
+    self->_find_callback = cb_function;
+}
+
+/*-------------------------------------------------------------------------*/
 /* virtual functions */
 /*-------------------------------------------------------------------------*/
-void kosp_list_destroy(void *vself)
+static void kosp_list_destroy(void *vself)
 {
     kosp_list_t *self = (kosp_list_t *) vself;
     kosp_list_element_t *element;
@@ -231,7 +251,7 @@ void kosp_list_destroy(void *vself)
         element = next;
     }
 
-    kosp_base_destroy(self);
+    kosp_base_destroy(vself);
 }
 
 /*-------------------------------------------------------------------------*/

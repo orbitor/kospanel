@@ -25,6 +25,8 @@ int kosp_x11_color_depth(void);
 Colormap kosp_x11_colormap(void);
 int kosp_x11_screen(void);
 Visual *kosp_x11_visual(void);
+Time kosp_x11_server_time(void);
+void kosp_x11_set_server_time(Time server_time);
 void kosp_x11_get_last_x_error(int *error_code, int *request_code);
 
 Window kosp_x11_create_child_window(Window parent);

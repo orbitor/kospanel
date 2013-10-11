@@ -23,6 +23,7 @@ struct _kosp_x11_t
     XineramaScreenInfo *_xinerama_info;
     Window _root_window;
     Colormap _colormap;
+    Time _server_time;
     int _screen;
     int _color_depth;
     int _error_code;
@@ -198,6 +199,20 @@ int kosp_x11_screen(void)
 Visual *kosp_x11_visual(void)
 {
     return kosp_x11._visual;
+}
+
+/*-------------------------------------------------------------------------*/
+/*-------------------------------------------------------------------------*/
+Time kosp_x11_server_time(void)
+{
+    return kosp_x11._server_time;
+}
+
+/*-------------------------------------------------------------------------*/
+/*-------------------------------------------------------------------------*/
+void kosp_x11_set_server_time(Time server_time)
+{
+    kosp_x11._server_time = server_time;
 }
 
 /*-------------------------------------------------------------------------*/

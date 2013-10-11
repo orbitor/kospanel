@@ -11,11 +11,30 @@
 #define COM_LUCKYGREENFROG_KOSP_APP_H_
 
 #include "kosp_types.h"
+#include "kosp_ui.h"
 
+/*-------------------------------------------------------------------------*/
+/*-------------------------------------------------------------------------*/
+enum
+{
+    KA_RS_NONE,
+    KS_RS_STARTING_UP,
+    KS_RS_RUNNING,
+    KS_RS_SHUTTING_DOWN,
+    KS_RS_HALTED,
+    KS_RS_MAX
+};
+
+/*-------------------------------------------------------------------------*/
+/*-------------------------------------------------------------------------*/
 bool kosp_app_init(int argc, char *argv[]);
 void kosp_app_shutdown(void);
 
 int kosp_app_exec(void);
+int kosp_app_run_state(void);
+
+void kosp_app_ui_event_responder_add(kosp_ui_t *responder);
+kosp_ui_t *kosp_app_ui_event_responder_remove(kosp_ui_t *responder);
 
 #endif  /* COM_LUCKYGREENFROG_KOSP_APP_H_ */
 
