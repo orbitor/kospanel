@@ -41,11 +41,14 @@ typedef struct _kosp_ui_t kosp_ui_t;
 /*-------------------------------------------------------------------------*/
 kosp_ui_t *kosp_ui_create_default(void);
 kosp_ui_t *kosp_ui_create(int isa, void *parent, int x, int y,
-        unsigned int width, unsigned int height);
+        unsigned int width, unsigned int height,
+        bool isa_responder);
 void kosp_ui_init(kosp_ui_t *self, int isa, int x, int y,
-        unsigned int width, unsigned int height);
+        unsigned int width, unsigned int height,
+        bool isa_responder);
 void kosp_ui_set(kosp_ui_t *self, int isa, int x, int y,
-        unsigned int width, unsigned int height);
+        unsigned int width, unsigned int height,
+        bool isa_responder);
 void kosp_ui_funcs_init(kosp_ui_t *self);
 
 /*-------------------------------------------------------------------------*/
@@ -60,6 +63,8 @@ void kosp_ui_init_palette_with_data(void *vself,
         int color_array_len);
 
 void kosp_ui_line_draw(void *vself, XSegment segment, int pal_index);
+
+bool kosp_ui_isa_responder(void *vself);
 
 /*-------------------------------------------------------------------------*/
 /* virtual functions */
@@ -120,12 +125,13 @@ int kosp_ui_event_destroy_notify(void *vself, XDestroyWindowEvent *event);
     ui_func_event_expose            expose; \
     ui_func_event_unmap_notify      unmap_notify; \
     ui_func_event_destroy_notify    destroy_notify; \
+    unsigned long                   _palette[KU_CLR_MAX]; \
     void                           *_parent; \
     kosp_list_t                    *_child_list; \
+    XRectangle                      _posnsize; \
     Window                          _window; \
     GC                              _gc; \
-    XRectangle                      _posnsize; \
-    unsigned long                   _palette[KU_CLR_MAX];
+    bool                            _isa_responder;
 
 struct _kosp_ui_t
 {

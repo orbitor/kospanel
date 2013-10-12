@@ -31,14 +31,15 @@ kosp_ui_t *kosp_ui_create_default(void)
 /*-------------------------------------------------------------------------*/
 /*-------------------------------------------------------------------------*/
 kosp_ui_t *kosp_ui_create(int isa, void *parent, int x, int y,
-        unsigned int width, unsigned int height)
+        unsigned int width, unsigned int height,
+        bool isa_responder)
 {
     Window xparent = None;
     kosp_ui_t *kui = kosp_ui_create_default();
 
     if (NULL != kui)
     {
-        kosp_ui_init(kui, isa, x, y, width, height);
+        kosp_ui_init(kui, isa, x, y, width, height, isa_responder);
 
         if (NULL != parent)
         {
@@ -55,7 +56,7 @@ kosp_ui_t *kosp_ui_create(int isa, void *parent, int x, int y,
             kui->_window = kosp_x11_create_child_window(xparent);
         }
 
-        if (None != kui->_window)
+        if (None != kui->_window && true == kui->_isa_responder)
         {
             kosp_app_ui_event_responder_add(kui, kui->_window);
         }
@@ -72,11 +73,12 @@ kosp_ui_t *kosp_ui_create(int isa, void *parent, int x, int y,
 /*-------------------------------------------------------------------------*/
 /*-------------------------------------------------------------------------*/
 void kosp_ui_init(kosp_ui_t *self, int isa, int x, int y, 
-        unsigned int width, unsigned int height)
+        unsigned int width, unsigned int height,
+        bool isa_responder)
 {
     kosp_base_init((kosp_base_t *) self, isa);
     kosp_ui_funcs_init(self);
-    kosp_ui_set(self, isa, x, y, width, height);
+    kosp_ui_set(self, isa, x, y, width, height, isa_responder);
 
     self->_window = None;
     self->_child_list = kosp_list_create(false, true);
@@ -85,13 +87,15 @@ void kosp_ui_init(kosp_ui_t *self, int isa, int x, int y,
 /*-------------------------------------------------------------------------*/
 /*-------------------------------------------------------------------------*/
 void kosp_ui_set(kosp_ui_t *self, int isa, int x, int y,
-        unsigned int width, unsigned int height)
+        unsigned int width, unsigned int height,
+        bool isa_responder)
 {
     kosp_isa_set(self, isa);
     self->_posnsize.x = x;
     self->_posnsize.y = y;
     self->_posnsize.width = width;
     self->_posnsize.height = height;
+    self->_isa_responder = isa_responder;
 }
 
 /*-------------------------------------------------------------------------*/

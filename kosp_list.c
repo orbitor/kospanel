@@ -228,6 +228,11 @@ bool kosp_list_add(kosp_list_t *self, void *ptr, bool add_front)
 
     self->_nelements++;
 
+    printf("%s\t%p\tnelements now %d\n",
+            __func__,
+            self,
+            self->_nelements);
+
     return true;
 }
 
@@ -272,6 +277,11 @@ kosp_base_t *kosp_list_remove(kosp_list_t *self, void *ptr)
         kle->destroy(kle);
 
         self->_nelements--;
+
+        printf("%s\t%p\tnelements now %d\n",
+                __func__,
+                self,
+                self->_nelements);
     }
 
     return retptr;

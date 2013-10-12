@@ -20,3 +20,6 @@ kospanel
 
 # the build directory
 _build
+
+# vim swap files
+*.swp
