@@ -29,6 +29,8 @@ int main(int argc, char *argv[])
     kosp_app_shutdown();
     kosp_x11_shutdown();
 
+    kosp_app_destroy();
+
     return 0;
 }
 

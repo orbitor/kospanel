@@ -31,6 +31,7 @@ enum
 /*-------------------------------------------------------------------------*/
 bool kosp_app_init(int argc, char *argv[]);
 void kosp_app_shutdown(void);
+void kosp_app_destroy(void);
 
 int kosp_app_exec(void);
 int kosp_app_run_state(void);

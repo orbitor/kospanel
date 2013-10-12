@@ -56,6 +56,7 @@ bool kosp_x11_init(void)
     kosp_x11._colormap = DefaultColormap(kosp_x11._display,
             kosp_x11._screen);
 
+#if 0
     {
         int nscreens = ScreenCount(kosp_x11._display);
         int width = DisplayWidth(kosp_x11._display, kosp_x11._screen);
@@ -63,6 +64,7 @@ bool kosp_x11_init(void)
         printf("nscreens %d\twidth %d\theight %d\n",
                 nscreens, width, height);
     }
+#endif
 
     /* make sure we have a reasonable color depth */
     if (kosp_x11._color_depth < 8)
@@ -131,6 +133,11 @@ bool kosp_x11_init(void)
             kosp_x11._xinerama_info = (XineramaScreenInfo *)
                 malloc(sizeof(XineramaScreenInfo) * nscr);
 
+            printf("%s\txinerama_info %p\tsize %ld\n",
+                    __func__,
+                    kosp_x11._xinerama_info,
+                    sizeof(XineramaScreenInfo) * nscr);
+
             if (NULL != kosp_x11._xinerama_info)
             {
                 memcpy(kosp_x11._xinerama_info,
@@ -149,6 +156,8 @@ bool kosp_x11_init(void)
 /*-------------------------------------------------------------------------*/
 void kosp_x11_shutdown(void)
 {
+    printf("%s\n", __func__);
+
     XCloseDisplay(kosp_x11._display);
 
     if (NULL != kosp_x11._xinerama_info)

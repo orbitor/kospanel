@@ -7,6 +7,7 @@
  */
 /*-------------------------------------------------------------------------*/
 
+#include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
 #include "kosp_list.h"
@@ -62,6 +63,11 @@ void kosp_list_destroy(void *vself)
         return;
     }
 
+    printf("%s\tdestroying %p\tsize %ld\n",
+            __func__,
+            self,
+            sizeof(kosp_list_t));
+
     element = self->_first;
 
     while(element)
@@ -93,6 +99,11 @@ kosp_list_t *kosp_list_create(bool allow_dups, bool owns_entries)
         kl->destroy = kosp_list_destroy;
         kl->_allow_dups = allow_dups;
         kl->_owns_entries = owns_entries;
+
+        printf("%s\tcreating %p\tsize %ld\n",
+                __func__,
+                kl,
+                sizeof(*kl));
     }
 
     return kl;
@@ -252,6 +263,12 @@ kosp_base_t *kosp_list_remove(kosp_list_t *self, void *ptr)
         self->_cache = self->_first;
 
         retptr = kle->_ptr;
+
+        printf("%s\tdestroying %p\tsize %ld\n",
+                __func__,
+                kle,
+                sizeof(*kle));
+
         kle->destroy(kle);
 
         self->_nelements--;
@@ -331,6 +348,11 @@ static kosp_list_element_t *_kosp_list_element_create(void *ptr,
         memset(kle, 0, sizeof(kosp_list_element_t));
         kosp_base_init((kosp_base_t *) kle, KPT_LIST_ELEMENT);
         kle->_ptr = ptr;
+
+        printf("%s\tcreating %p\tsize %ld\n",
+                __func__,
+                kle,
+                sizeof(*kle));
     }
 
     return kle;

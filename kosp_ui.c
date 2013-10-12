@@ -7,6 +7,7 @@
  */
 /*-------------------------------------------------------------------------*/
 
+#include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include "kosp_x11.h"
@@ -58,6 +59,11 @@ kosp_ui_t *kosp_ui_create(int isa, void *parent, int x, int y,
         {
             kosp_app_ui_event_responder_add(kui, kui->_window);
         }
+
+        printf("%s\tcreating %p\tsize %ld\n",
+                __func__,
+                kui,
+                sizeof(*kui));
     }
 
     return kui;
@@ -187,6 +193,11 @@ void kosp_ui_destroy(void *vself)
     {
         kosp_x11_destroy_window(kui->_window);
     }
+
+    printf("%s\tdestroying %p\tsize %ld\n",
+            __func__,
+            kui,
+            sizeof(*kui));
 
     kosp_base_destroy(vself);
 }

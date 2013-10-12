@@ -7,6 +7,7 @@
  */
 /*-------------------------------------------------------------------------*/
 
+#include <stdio.h>
 #include <stdlib.h>
 #include "kosp_types.h"
 #include "kosp_base.h"
@@ -35,6 +36,11 @@ void kosp_base_destroy(void *vself)
 {
     if (NULL != vself)
     {
+        printf("%s\tdestroying %p\tsize %ld\n",
+                __func__,
+                vself,
+                sizeof(kosp_base_t));
+
         free(vself);
         vself = NULL;
     }

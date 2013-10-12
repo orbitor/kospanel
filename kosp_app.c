@@ -7,6 +7,7 @@
  */
 /*-------------------------------------------------------------------------*/
 
+#include <stdio.h>
 #include <string.h>
 #include <X11/Xlib.h>
 #include "kosp_base.h"
@@ -21,7 +22,6 @@
 typedef struct _kosp_app_t kosp_app_t;
 struct _kosp_app_t
 {
-    KOSP_BASE_MEMBERS_DECLARE
     kosp_list_t        *_ui_event_responders;
     bool                _run_state;
     int                 _xfd;
@@ -43,11 +43,6 @@ static bool _kosp_app_ui_event_responder_find_cb(const void *ptr,
         const void *compare_data);
 
 /*-------------------------------------------------------------------------*/
-/* virtual functions */
-/*-------------------------------------------------------------------------*/
-static void kosp_app_destroy(void *vself);
-
-/*-------------------------------------------------------------------------*/
 /* static instance */
 /*-------------------------------------------------------------------------*/
 static kosp_app_t kosp_app;
@@ -57,8 +52,6 @@ static kosp_app_t kosp_app;
 bool kosp_app_init(int argc, char *argv[])
 {
     memset(&kosp_app, 0, sizeof(kosp_app));
-    kosp_base_init((kosp_base_t *) &kosp_app, KPT_APP);
-    kosp_app.destroy = kosp_app_destroy;
 
     kosp_app._run_state = KS_RS_STARTING_UP;
 
@@ -78,6 +71,19 @@ bool kosp_app_init(int argc, char *argv[])
 void kosp_app_shutdown(void)
 {
     kosp_app._run_state = KS_RS_SHUTTING_DOWN;
+}
+
+/*-------------------------------------------------------------------------*/
+/*-------------------------------------------------------------------------*/
+void kosp_app_destroy(void)
+{
+    printf("%s\n", __func__);
+
+    if (NULL != kosp_app._ui_event_responders)
+    {
+        kosp_list_destroy(kosp_app._ui_event_responders);
+        kosp_app._ui_event_responders = NULL;
+    }
 }
 
 /*-------------------------------------------------------------------------*/
@@ -110,19 +116,6 @@ int kosp_app_exec(void)
     }
 
     return 0;
-}
-
-/*-------------------------------------------------------------------------*/
-/*-------------------------------------------------------------------------*/
-static void kosp_app_destroy(void *vself)
-{
-    if (NULL != kosp_app._ui_event_responders)
-    {
-        kosp_list_destroy(kosp_app._ui_event_responders);
-        kosp_app._ui_event_responders = NULL;
-    }
-
-    kosp_base_destroy(vself);
 }
 
 /*-------------------------------------------------------------------------*/
