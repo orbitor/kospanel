@@ -8,7 +8,7 @@
 cmake_minimum_required(VERSION 2.8)
 
 find_package(X11 REQUIRED)
-find_package(Freetype REQUIRED)
+#find_package(Freetype REQUIRED)
 
 set (KOSPANEL_ROOT
         ${CMAKE_CURRENT_LIST_DIR}
@@ -27,6 +27,7 @@ set (KOSPANEL_SOURCES
 
 include_directories(
         ${KOSPANEL_ROOT}
+        ${X11_X11_INCLUDE_PATH}
         ${FREETYPE_INCLUDE_DIRS}
 )
 
@@ -42,15 +43,14 @@ add_executable(kospanel
 )
 
 target_link_libraries(kospanel
-        X11
-        Xext
-        Xft
-        Xrender
-        Xau
-        Xdmcp
-        Xinerama
-        xcb
-        freetype
-        fontconfig
+        ${X11_X11_LIB}
+        ${X11_Xext_LIB}
+        ${X11_Xft_LIB}
+        ${X11_Xrender_LIB}
+        ${X11_Xau_LIB}
+        ${X11_Xdmcp_LIB}
+        ${X11_Xinerama_LIB}
+        ${X11_xcb_LIB}
+        ${FREETYPE_LIBRARY}
 )
         

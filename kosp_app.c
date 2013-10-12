@@ -11,22 +11,9 @@
 #include <X11/Xlib.h>
 #include "kosp_base.h"
 #include "kosp_list.h"
+#include "kosp_ui.h"
 #include "kosp_x11.h"
 #include "kosp_app.h"
-
-/*-------------------------------------------------------------------------*/
-/* virtual functions */
-/*-------------------------------------------------------------------------*/
-static void kosp_app_destroy(void *vself);
-
-/*-------------------------------------------------------------------------*/
-/* static functions */
-/*-------------------------------------------------------------------------*/
-static void kosp_app_process_xevent(XEvent *event);
-static kosp_ui_t *kosp_app_find_event_responder(Window xwindow);
-
-static bool kosp_app_ui_event_responders_find(const void *ptr,
-        const void *compare_data);
 
 /*-------------------------------------------------------------------------*/
 /* typedef for kosp_app */
@@ -39,6 +26,26 @@ struct _kosp_app_t
     bool                _run_state;
     int                 _xfd;
 };
+
+typedef struct _kosp_ui_event_responder_t kosp_ui_event_responder_t;
+struct _kosp_ui_event_responder_t
+{
+    kosp_ui_t  *_responder;
+    Window      _window;
+};
+
+/*-------------------------------------------------------------------------*/
+/* static functions */
+/*-------------------------------------------------------------------------*/
+static void _kosp_app_process_xevent(XEvent *event);
+static kosp_ui_event_responder_t *_kosp_app_find_event_responder(Window window);
+static bool _kosp_app_ui_event_responder_find_cb(const void *ptr,
+        const void *compare_data);
+
+/*-------------------------------------------------------------------------*/
+/* virtual functions */
+/*-------------------------------------------------------------------------*/
+static void kosp_app_destroy(void *vself);
 
 /*-------------------------------------------------------------------------*/
 /* static instance */
@@ -55,13 +62,15 @@ bool kosp_app_init(int argc, char *argv[])
 
     kosp_app._run_state = KS_RS_STARTING_UP;
 
-    kosp_app._ui_event_responders = kosp_list_create(false, false);
+    kosp_app._ui_event_responders = kosp_list_create(false, true);
 
-    if (kosp_app._ui_event_responders)
+    if (NULL != kosp_app._ui_event_responders)
     {
         kosp_list_set_find_callback(kosp_app._ui_event_responders,
-                kosp_app_ui_event_responders_find);
+                _kosp_app_ui_event_responder_find_cb);
     }
+
+    return true;
 }
 
 /*-------------------------------------------------------------------------*/
@@ -81,6 +90,23 @@ int kosp_app_exec(void)
 
     while(KS_RS_RUNNING == kosp_app._run_state)
     {
+        do
+        {
+            XEvent event;
+
+            while(KS_RS_RUNNING == kosp_app._run_state &&
+                    XEventsQueued(kosp_x11_display(), QueuedAlready))
+            {
+                XNextEvent(kosp_x11_display(), &event);
+                _kosp_app_process_xevent(&event);
+            }
+        } while(KS_RS_RUNNING == kosp_app._run_state &&
+                XEventsQueued(kosp_x11_display(), QueuedAfterFlush));
+
+        if (KS_RS_RUNNING != kosp_app._run_state)
+        {
+            break;
+        } 
     }
 
     return 0;
@@ -92,7 +118,7 @@ static void kosp_app_destroy(void *vself)
 {
     if (NULL != kosp_app._ui_event_responders)
     {
-        kosp_app._ui_event_responders->destroy(kosp_app._ui_event_responders);
+        kosp_list_destroy(kosp_app._ui_event_responders);
         kosp_app._ui_event_responders = NULL;
     }
 
@@ -108,21 +134,25 @@ int kosp_app_run_state(void)
 
 /*-------------------------------------------------------------------------*/
 /*-------------------------------------------------------------------------*/
-void kosp_app_ui_event_responder_add(kosp_ui_t *responder)
+void kosp_app_ui_event_responder_add(kosp_ui_t *responder, Window window)
 {
     if (NULL != kosp_app._ui_event_responders)
     {
+        kosp_list_add(kosp_app._ui_event_responders, responder, false);
     }
 }
 
 /*-------------------------------------------------------------------------*/
 /*-------------------------------------------------------------------------*/
-kosp_ui_t *kosp_app_ui_event_responder_remove(kosp_ui_t *responder)
+kosp_ui_t *kosp_app_ui_event_responder_remove(kosp_ui_t *responder,
+        Window window)
 {
     kosp_ui_t *retval = NULL;
 
     if (NULL != kosp_app._ui_event_responders)
     {
+        retval = (kosp_ui_t *) kosp_list_remove(
+                kosp_app._ui_event_responders, responder);
     }
 
     return retval;
@@ -130,10 +160,10 @@ kosp_ui_t *kosp_app_ui_event_responder_remove(kosp_ui_t *responder)
 
 /*-------------------------------------------------------------------------*/
 /*-------------------------------------------------------------------------*/
-static void kosp_app_process_xevent(XEvent *event)
+static void _kosp_app_process_xevent(XEvent *event)
 {
-    kosp_ui_t *event_responder = kosp_app_find_event_responder(
-            event->xany.window);
+    kosp_ui_event_responder_t *event_responder = 
+        _kosp_app_find_event_responder( event->xany.window);
 
     if (NULL == event_responder)
     {
@@ -143,12 +173,14 @@ static void kosp_app_process_xevent(XEvent *event)
 
 /*-------------------------------------------------------------------------*/
 /*-------------------------------------------------------------------------*/
-static kosp_ui_t *kosp_app_find_event_responder(Window xwindow)
+static kosp_ui_event_responder_t *_kosp_app_find_event_responder(Window window)
 {
-    kosp_ui_t *retval = NULL;
+    kosp_ui_event_responder_t *retval = NULL;
 
     if (NULL != kosp_app._ui_event_responders)
     {
+        retval = (kosp_ui_event_responder_t *) kosp_list_find_by_cb(
+                kosp_app._ui_event_responders, &window);
     }
 
     return retval;
@@ -156,10 +188,10 @@ static kosp_ui_t *kosp_app_find_event_responder(Window xwindow)
 
 /*-------------------------------------------------------------------------*/
 /*-------------------------------------------------------------------------*/
-static bool kosp_app_ui_event_responders_find(const void *ptr,
+static bool _kosp_app_ui_event_responder_find_cb(const void *ptr,
         const void *compare_data)
 {
-    if (kosp_ui_window(ptr) == (Window) *compare_data)
+    if (kosp_ui_window(ptr) == *((const Window *)compare_data))
     {
         return true;
     }

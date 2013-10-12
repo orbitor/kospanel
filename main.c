@@ -4,19 +4,29 @@
 
 #include "kosp_x11.h"
 #include "kosp_ui.h"
+#include "kosp_app.h"
 
 int main(int argc, char *argv[])
 {
+    kosp_ui_t *k1;
+    kosp_ui_t *k2;
+    kosp_ui_t *k1_2;
+    kosp_ui_t *k1_2_1;
+    kosp_ui_t *k1_2_2;
+
+    kosp_app_init(argc, argv);
     kosp_x11_init();
 
-    kosp_ui_t *kui = kosp_ui_create(KPT_UI, NULL, 10, 20, 100, 200);
+    k1 = kosp_ui_create(KPT_UI, NULL, 10, 20, 100, 200);
+    k2 = kosp_ui_create(KPT_UI, NULL, 100, 50, 80, 22);
+    k1_2 = kosp_ui_create(KPT_UI, k1, 86, 23, 55, 65);
+    k1_2_1 = kosp_ui_create(KPT_UI, k1_2, 77, 88, 99, 100);
+    k1_2_2 = kosp_ui_create(KPT_UI, k1_2, 22, 33, 44, 55);
 
-    printf("%s\tkui 0x%08x\n",
-            __func__,
-            (unsigned int) kui);
+    k1->destroy(k1);
+    k2->destroy(k2);
 
-    kui->destroy(kui);
-
+    kosp_app_shutdown();
     kosp_x11_shutdown();
 
     return 0;

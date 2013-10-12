@@ -51,9 +51,9 @@ void kosp_ui_funcs_init(kosp_ui_t *self);
 /*-------------------------------------------------------------------------*/
 /* type functions */
 /*-------------------------------------------------------------------------*/
-int kosp_ui_width(void *vself);
-int kosp_ui_height(void *vself);
-Window kosp_ui_window(void *vself);
+int kosp_ui_width(const void *vself);
+int kosp_ui_height(const void *vself);
+Window kosp_ui_window(const void *vself);
 
 void kosp_ui_init_palette_with_data(void *vself,
         unsigned short *color_array,

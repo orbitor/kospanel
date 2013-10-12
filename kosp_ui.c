@@ -11,6 +11,7 @@
 #include <string.h>
 #include "kosp_x11.h"
 #include "kosp_ui.h"
+#include "kosp_app.h"
 
 /*-------------------------------------------------------------------------*/
 /*-------------------------------------------------------------------------*/
@@ -41,6 +42,7 @@ kosp_ui_t *kosp_ui_create(int isa, void *parent, int x, int y,
         if (NULL != parent)
         {
             xparent = ((kosp_ui_t *) parent)->_window;
+            kosp_ui_add(parent, kui, false);
         }
 
         if (None == xparent)
@@ -50,6 +52,11 @@ kosp_ui_t *kosp_ui_create(int isa, void *parent, int x, int y,
         else
         {
             kui->_window = kosp_x11_create_child_window(xparent);
+        }
+
+        if (None != kui->_window)
+        {
+            kosp_app_ui_event_responder_add(kui, kui->_window);
         }
     }
 
@@ -75,6 +82,8 @@ void kosp_ui_set(kosp_ui_t *self, int isa, int x, int y,
         unsigned int width, unsigned int height)
 {
     kosp_isa_set(self, isa);
+    self->_posnsize.x = x;
+    self->_posnsize.y = y;
     self->_posnsize.width = width;
     self->_posnsize.height = height;
 }
@@ -104,11 +113,11 @@ void kosp_ui_funcs_init(kosp_ui_t *self)
 
 /*-------------------------------------------------------------------------*/
 /*-------------------------------------------------------------------------*/
-int kosp_ui_width(void *vself)
+int kosp_ui_width(const void *vself)
 {
     if (vself)
     {
-        return ((kosp_ui_t *) vself)->_posnsize.width;
+        return ((const kosp_ui_t *) vself)->_posnsize.width;
     }
 
     return -1;
@@ -116,11 +125,11 @@ int kosp_ui_width(void *vself)
 
 /*-------------------------------------------------------------------------*/
 /*-------------------------------------------------------------------------*/
-int kosp_ui_height(void *vself)
+int kosp_ui_height(const void *vself)
 {
     if (vself)
     {
-        return ((kosp_ui_t *) vself)->_posnsize.height;
+        return ((const kosp_ui_t *) vself)->_posnsize.height;
     }
 
     return -1;
@@ -128,11 +137,11 @@ int kosp_ui_height(void *vself)
 
 /*-------------------------------------------------------------------------*/
 /*-------------------------------------------------------------------------*/
-Window kosp_ui_window(void *vself)
+Window kosp_ui_window(const void *vself)
 {
     if (vself)
     {
-        return ((kosp_ui_t *) vself)->_window;
+        return ((const kosp_ui_t *) vself)->_window;
     }
 
     return None;
@@ -166,9 +175,11 @@ void kosp_ui_destroy(void *vself)
 
     kui = (kosp_ui_t *) vself;
 
+    kosp_app_ui_event_responder_remove(kui, kui->_window);
+
     if (NULL != kui->_child_list)
     {
-        kui->_child_list->destroy(kui->_child_list);
+        kosp_list_destroy(kui->_child_list);
         kui->_child_list = NULL;
     }
 

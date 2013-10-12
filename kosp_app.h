@@ -11,7 +11,9 @@
 #define COM_LUCKYGREENFROG_KOSP_APP_H_
 
 #include "kosp_types.h"
-#include "kosp_ui.h"
+
+/* forward declaration */
+struct kosp_ui_t;
 
 /*-------------------------------------------------------------------------*/
 /*-------------------------------------------------------------------------*/
@@ -33,8 +35,9 @@ void kosp_app_shutdown(void);
 int kosp_app_exec(void);
 int kosp_app_run_state(void);
 
-void kosp_app_ui_event_responder_add(kosp_ui_t *responder);
-kosp_ui_t *kosp_app_ui_event_responder_remove(kosp_ui_t *responder);
+void kosp_app_ui_event_responder_add(kosp_ui_t *responder, Window window);
+kosp_ui_t *kosp_app_ui_event_responder_remove(kosp_ui_t *responder,
+        Window window);
 
 #endif  /* COM_LUCKYGREENFROG_KOSP_APP_H_ */
 

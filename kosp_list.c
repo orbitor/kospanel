@@ -12,15 +12,73 @@
 #include "kosp_list.h"
 
 /*-------------------------------------------------------------------------*/
-/* virtual functions */
+/* type declarations */
 /*-------------------------------------------------------------------------*/
-static void kosp_list_destroy(void *vself);
+#define KOSP_LIST_MEMBERS_DECLARE \
+    KOSP_BASE_MEMBERS_DECLARE \
+    kosp_list_element_t    *_first; \
+    kosp_list_element_t    *_last; \
+    kosp_list_element_t    *_cache; \
+    kosp_list_find_callback _find_callback; \
+    int                     _nelements; \
+    bool                    _allow_dups; \
+    bool                    _owns_entries;
+
+#define KOSP_LIST_ELEMENT_MEMBERS_DECLARE \
+    KOSP_BASE_MEMBERS_DECLARE \
+    kosp_list_element_t    *_next; \
+    kosp_list_element_t    *_prev; \
+    kosp_base_t            *_ptr;
+
+struct _kosp_list_t
+{
+    KOSP_LIST_MEMBERS_DECLARE
+};
+
+struct _kosp_list_element_t
+{
+    KOSP_LIST_ELEMENT_MEMBERS_DECLARE
+};
 
 /*-------------------------------------------------------------------------*/
 /*-------------------------------------------------------------------------*/
-static kosp_list_element_t *_kosp_list_element_create(void *ptr);
+static kosp_list_element_t *_kosp_list_element_create(void *ptr,
+        bool owns_ptr);
 static kosp_list_element_t *_kosp_list_element_find_by_ptr(
         kosp_list_t *self, void *ptr);
+
+/*-------------------------------------------------------------------------*/
+/* virtual functions */
+/*-------------------------------------------------------------------------*/
+void kosp_list_destroy(void *vself)
+{
+    kosp_list_t *self = (kosp_list_t *) vself;
+    kosp_list_element_t *element;
+    kosp_list_element_t *next;
+    kosp_base_t *ptr;
+
+    if (NULL == self)
+    {
+        return;
+    }
+
+    element = self->_first;
+
+    while(element)
+    {
+        next = element->_next;
+        ptr = kosp_list_remove(self, element->_ptr);
+
+        if (self->_owns_entries)
+        {
+            ptr->destroy(ptr);
+        }
+
+        element = next;
+    }
+
+    kosp_base_destroy(vself);
+}
 
 /*-------------------------------------------------------------------------*/
 /*-------------------------------------------------------------------------*/
@@ -69,20 +127,19 @@ kosp_base_t *kosp_list_last(kosp_list_t *self)
 /*-------------------------------------------------------------------------*/
 kosp_base_t *kosp_list_next(kosp_list_t *self, void *ptr)
 {
+    kosp_base_t *retval = NULL;
+
     if (NULL == self->_first || NULL == ptr)
     {
         return NULL;
     }
 
-    if (NULL != self->_cache)
+    if (NULL != self->_cache && self->_cache->_ptr == ptr)
     {
         if (NULL != self->_cache->_next)
         {
-            if (ptr == self->_cache->_next->_ptr)
-            {
-                self->_cache = self->_cache->_next;
-                return self->_cache->_ptr;
-            }
+            retval = self->_cache->_next->_ptr;
+            self->_cache = self->_cache->_next;
         }
     }
     else
@@ -95,20 +152,18 @@ kosp_base_t *kosp_list_next(kosp_list_t *self, void *ptr)
             {
                 if (NULL != kle->_next)
                 {
+                    retval = kle->_next->_ptr;
                     self->_cache = kle->_next;
-                    return self->_cache->_ptr;
                 }
-                else
-                {
-                    break;
-                }
+
+                break;
             }
 
             kle = kle->_next;
         }
     }
 
-    return NULL;
+    return retval;
 }
 
 /*-------------------------------------------------------------------------*/
@@ -132,7 +187,7 @@ bool kosp_list_add(kosp_list_t *self, void *ptr, bool add_front)
         }
     }
 
-    kle = _kosp_list_element_create(ptr);
+    kle = _kosp_list_element_create(ptr, self->_owns_entries);
 
     if (NULL == kle)
     {
@@ -160,6 +215,8 @@ bool kosp_list_add(kosp_list_t *self, void *ptr, bool add_front)
         }
     }
 
+    self->_nelements++;
+
     return true;
 }
 
@@ -176,7 +233,8 @@ kosp_base_t *kosp_list_remove(kosp_list_t *self, void *ptr)
         {
             self->_first = self->_first->_next;
         }
-        else if (self->_last == kle)
+
+        if (self->_last == kle)
         {
             self->_last = self->_last->_prev;
         }
@@ -195,6 +253,8 @@ kosp_base_t *kosp_list_remove(kosp_list_t *self, void *ptr)
 
         retptr = kle->_ptr;
         kle->destroy(kle);
+
+        self->_nelements--;
     }
 
     return retptr;
@@ -202,9 +262,24 @@ kosp_base_t *kosp_list_remove(kosp_list_t *self, void *ptr)
 
 /*-------------------------------------------------------------------------*/
 /*-------------------------------------------------------------------------*/
-bool kosp_list_find(kosp_list_t *self, void *compare_data)
+kosp_base_t *kosp_list_find(kosp_list_t *self, void *ptr)
 {
+    kosp_base_t *retval = NULL;
 
+    kosp_base_t *compare = kosp_list_first(self);
+
+    while(compare)
+    {
+        if (compare == (kosp_base_t *) ptr)
+        {
+            retval = compare;
+            break;
+        }
+
+        compare = kosp_list_next(self, compare);
+    }
+
+    return retval;
 }
 
 /*-------------------------------------------------------------------------*/
@@ -216,48 +291,37 @@ void kosp_list_set_find_callback(kosp_list_t *self,
 }
 
 /*-------------------------------------------------------------------------*/
-/* virtual functions */
 /*-------------------------------------------------------------------------*/
-static void kosp_list_destroy(void *vself)
+kosp_base_t *kosp_list_find_by_cb(kosp_list_t *self, const void *compare_data)
 {
-    kosp_list_t *self = (kosp_list_t *) vself;
-    kosp_list_element_t *element;
-    kosp_list_element_t *next;
-    kosp_base_t *ptr = NULL;
+    kosp_base_t *retval = NULL;
 
-    if (NULL == self)
+    if (NULL == self->_find_callback)
     {
-        return;
+        return retval;
     }
 
-    element = self->_first;
+    kosp_list_element_t *kle = self->_first;
 
-    while(element)
+    while(kle)
     {
-        next = element->_next;
-
-        if (self->_owns_entries)
+        if (true == self->_find_callback(kle->_ptr, compare_data))
         {
-            ptr = element->_ptr;
+            retval = kle->_ptr;
+            break;
         }
 
-        element->destroy(element);
-
-        if (NULL != ptr)
-        {
-            ptr->destroy(ptr);
-        }
-
-        element = next;
+        kle = kle->_next;
     }
 
-    kosp_base_destroy(vself);
+    return retval;
 }
 
 /*-------------------------------------------------------------------------*/
 /* static functions */
 /*-------------------------------------------------------------------------*/
-static kosp_list_element_t *_kosp_list_element_create(void *ptr)
+static kosp_list_element_t *_kosp_list_element_create(void *ptr,
+        bool owns_ptr)
 {
     kosp_list_element_t *kle = 
         (kosp_list_element_t *) malloc(sizeof(kosp_list_element_t));
@@ -266,6 +330,7 @@ static kosp_list_element_t *_kosp_list_element_create(void *ptr)
     {
         memset(kle, 0, sizeof(kosp_list_element_t));
         kosp_base_init((kosp_base_t *) kle, KPT_LIST_ELEMENT);
+        kle->_ptr = ptr;
     }
 
     return kle;
