@@ -123,6 +123,42 @@ void kosp_ui_funcs_init(kosp_ui_t *self)
 
 /*-------------------------------------------------------------------------*/
 /*-------------------------------------------------------------------------*/
+bool kosp_ui_isa_responder(void *vself)
+{
+    if (NULL != vself)
+    {
+        return ((kosp_ui_t *) vself)->_isa_responder;
+    }
+}
+
+/*-------------------------------------------------------------------------*/
+/*-------------------------------------------------------------------------*/
+void kosp_ui_isa_responder_set(void *vself, bool isa_responder)
+{
+    if (NULL != vself)
+    {
+        kosp_ui_t *self = (kosp_ui_t *) vself;
+
+        if (self->_isa_responder == isa_responder)
+        {
+            return;
+        }
+
+        self->_isa_responder = isa_responder;
+
+        if (self->_isa_responder)
+        {
+            kosp_app_ui_event_responder_add(self);
+        }
+        else
+        {
+            kosp_app_ui_event_responder_remove(self);
+        }
+    }
+}
+
+/*-------------------------------------------------------------------------*/
+/*-------------------------------------------------------------------------*/
 int kosp_ui_width(const void *vself)
 {
     if (vself)

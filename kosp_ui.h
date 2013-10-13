@@ -54,6 +54,11 @@ void kosp_ui_funcs_init(kosp_ui_t *self);
 /*-------------------------------------------------------------------------*/
 /* type functions */
 /*-------------------------------------------------------------------------*/
+bool kosp_ui_isa_responder(void *vself);
+void kosp_ui_isa_responder_set(void *vself, bool isa_responder);
+bool kosp_ui_is_visible(void *vself);
+void kosp_ui_is_visible_set(void *vself, bool is_enabled);
+
 int kosp_ui_width(const void *vself);
 int kosp_ui_height(const void *vself);
 Window kosp_ui_window(const void *vself);
@@ -63,8 +68,6 @@ void kosp_ui_init_palette_with_data(void *vself,
         int color_array_len);
 
 void kosp_ui_line_draw(void *vself, XSegment segment, int pal_index);
-
-bool kosp_ui_isa_responder(void *vself);
 
 /*-------------------------------------------------------------------------*/
 /* virtual functions */
@@ -131,7 +134,8 @@ int kosp_ui_event_destroy_notify(void *vself, XDestroyWindowEvent *event);
     XRectangle                      _posnsize; \
     Window                          _window; \
     GC                              _gc; \
-    bool                            _isa_responder;
+    bool                            _isa_responder; \
+    bool                            _is_visible;
 
 struct _kosp_ui_t
 {
