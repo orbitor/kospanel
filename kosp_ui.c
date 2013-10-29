@@ -16,6 +16,20 @@
 
 /*-------------------------------------------------------------------------*/
 /*-------------------------------------------------------------------------*/
+static unsigned short _kosp_ui_default_palette[] =
+{
+    0x0000, 0x0000, 0x0000,     /* KU_CLR_FG_NORMAL */
+    0xbefb, 0xbefb, 0xbefb,     /* KU_CLR_BG_NORMAL */
+    0xffff, 0xffff, 0xffff,     /* KU_CLR_FG_SELECTED */
+    0x8617, 0x8617, 0x8617,     /* KU_CLR_BG_SELECTED */
+    0xd75c, 0xd75c, 0xd75c,     /* KU_CLR_FG_DISABLED */
+    0x8617, 0x8617, 0x8617,     /* KU_CLR_BG_DISALBED */
+    0xffff, 0xffff, 0xffff,     /* KU_CLR_FG_HOVER */
+    0x0000, 0x9999, 0xcccc,     /* KU_CLR_BG_HOVER */
+};
+
+/*-------------------------------------------------------------------------*/
+/*-------------------------------------------------------------------------*/
 kosp_ui_t *kosp_ui_create_default(void)
 {
     kosp_ui_t *kui = (kosp_ui_t *) malloc(sizeof(kosp_ui_t));
@@ -199,6 +213,46 @@ void kosp_ui_init_palette_with_data(void *vself,
         unsigned short *color_array,
         int color_array_len)
 {
+    unsigned short *clr = NULL;
+    int len = 0;
+    int i;
+    int j = KU_CLR_FG_NORMAL;
+    XColor xclr;
+
+    kosp_ui_t *self = (kosp_ui_t *) vself;
+
+    if (NULL == self)
+    {
+        return;
+    }
+
+    if (NULL == color_array || 0 == color_array_len)
+    {
+        clr = _kosp_ui_default_palette;
+        len = KU_CLR_MAX;
+    }
+    else
+    {
+        clr = color_array;
+        len = color_array_len;
+
+        if (len > KU_CLR_MAX)
+        {
+            len = KU_CLR_MAX;
+        }
+    }
+
+    for (i = 0; i < len; i++)
+    {
+        xclr.red = *clr++;
+        xclr.green = *clr++;
+        xclr.blue = *clr++;
+        XAllocColor(kosp_x11_display(),
+                DefaultColormap(kosp_x11_display(), kosp_x11_screen()),
+                &xclr);
+        self->_palette[j] = xclr.pixel;
+        j++;
+    }
 }
 
 /*-------------------------------------------------------------------------*/
@@ -246,6 +300,7 @@ void kosp_ui_destroy(void *vself)
 /*-------------------------------------------------------------------------*/
 void kosp_ui_init_palette(void *vself)
 {
+    kosp_ui_init_palette_with_data(vself, NULL, 0);
 }
 
 void kosp_ui_draw(void *vself)
