@@ -14,8 +14,13 @@ int main(int argc, char *argv[])
     kosp_ui_t *k1_2_1;
     kosp_ui_t *k1_2_2;
 
+    if (false == kosp_x11_init())
+    {
+        fprintf(stderr, "kospanel: could not open the X display\n");
+        return 1;
+    }
+
     kosp_app_init(argc, argv);
-    kosp_x11_init();
 
     k1 = kosp_ui_create(KPT_UI, NULL, 10, 20, 100, 200, true);
     k2 = kosp_ui_create(KPT_UI, NULL, 100, 50, 80, 22, true);
