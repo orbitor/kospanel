@@ -75,7 +75,7 @@ kosp_ui_t *kosp_ui_create(int isa, void *parent, int x, int y,
             kosp_app_ui_event_responder_add(kui, kui->_window);
         }
 
-        printf("%s\tcreating %p\tsize %ld\n",
+        printf("%s\tcreating %p\tsize %d\n",
                 __func__,
                 kui,
                 sizeof(*kui));
@@ -143,6 +143,8 @@ bool kosp_ui_isa_responder(void *vself)
     {
         return ((kosp_ui_t *) vself)->_isa_responder;
     }
+
+    return false;
 }
 
 /*-------------------------------------------------------------------------*/
@@ -162,11 +164,11 @@ void kosp_ui_isa_responder_set(void *vself, bool isa_responder)
 
         if (self->_isa_responder)
         {
-            kosp_app_ui_event_responder_add(self);
+            kosp_app_ui_event_responder_add(self, self->_window);
         }
         else
         {
-            kosp_app_ui_event_responder_remove(self);
+            kosp_app_ui_event_responder_remove(self, self->_window);
         }
     }
 }
@@ -288,7 +290,7 @@ void kosp_ui_destroy(void *vself)
         kosp_x11_destroy_window(kui->_window);
     }
 
-    printf("%s\tdestroying %p\tsize %ld\n",
+    printf("%s\tdestroying %p\tsize %d\n",
             __func__,
             kui,
             sizeof(*kui));

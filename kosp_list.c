@@ -63,7 +63,7 @@ void kosp_list_destroy(void *vself)
         return;
     }
 
-    printf("%s\tdestroying %p\tsize %ld\n",
+    printf("%s\tdestroying %p\tsize %d\n",
             __func__,
             self,
             sizeof(kosp_list_t));
@@ -100,7 +100,7 @@ kosp_list_t *kosp_list_create(bool allow_dups, bool owns_entries)
         kl->_allow_dups = allow_dups;
         kl->_owns_entries = owns_entries;
 
-        printf("%s\tcreating %p\tsize %ld\n",
+        printf("%s\tcreating %p\tsize %d\n",
                 __func__,
                 kl,
                 sizeof(*kl));
@@ -269,7 +269,7 @@ kosp_base_t *kosp_list_remove(kosp_list_t *self, void *ptr)
 
         retptr = kle->_ptr;
 
-        printf("%s\tdestroying %p\tsize %ld\n",
+        printf("%s\tdestroying %p\tsize %d\n",
                 __func__,
                 kle,
                 sizeof(*kle));
@@ -359,7 +359,7 @@ static kosp_list_element_t *_kosp_list_element_create(void *ptr,
         kosp_base_init((kosp_base_t *) kle, KPT_LIST_ELEMENT);
         kle->_ptr = ptr;
 
-        printf("%s\tcreating %p\tsize %ld\n",
+        printf("%s\tcreating %p\tsize %d\n",
                 __func__,
                 kle,
                 sizeof(*kle));

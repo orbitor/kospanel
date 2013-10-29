@@ -133,7 +133,7 @@ bool kosp_x11_init(void)
             kosp_x11._xinerama_info = (XineramaScreenInfo *)
                 malloc(sizeof(XineramaScreenInfo) * nscr);
 
-            printf("%s\txinerama_info %p\tsize %ld\n",
+            printf("%s\txinerama_info %p\tsize %d\n",
                     __func__,
                     kosp_x11._xinerama_info,
                     sizeof(XineramaScreenInfo) * nscr);

@@ -36,7 +36,7 @@ void kosp_base_destroy(void *vself)
 {
     if (NULL != vself)
     {
-        printf("%s\tdestroying %p\tsize %ld\n",
+        printf("%s\tdestroying %p\tsize %d\n",
                 __func__,
                 vself,
                 sizeof(kosp_base_t));
