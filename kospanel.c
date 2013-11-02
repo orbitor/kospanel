@@ -442,7 +442,7 @@ gui_create_taskbar (void)
                                   /* attribs */ &att);
 
     /* set name and class */
-    wm_class.res_name = "fspanel";
+    wm_class.res_name = "kospanel";
 
     /* this is the magic sauce that makes this work with Openbox
      * properly: stick and on top

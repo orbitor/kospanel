@@ -16,6 +16,8 @@ set (KOSPANEL_ROOT
         "Kospanel root directory"
 )
 
+message(STATUS "CMAKE_CURRENT_LIST_DIR ${CMAKE_CURRENT_LIST_DIR}")
+
 set (KOSPANEL_SOURCES
         ${KOSPANEL_ROOT}/kosp_x11.c
         ${KOSPANEL_ROOT}/kosp_base.c
