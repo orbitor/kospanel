@@ -16,6 +16,15 @@ set (KOSPANEL_ROOT
         "Kospanel root directory"
 )
 
+# Set the default build type to Debug
+if (NOT CMAKE_BUILD_TYPE)
+  set(
+    CMAKE_BUILD_TYPE "Debug" CACHE STRING
+    "Choose the type of build: Debug or Release"
+    FORCE
+    )
+endif()
+
 message(STATUS "CMAKE_CURRENT_LIST_DIR ${CMAKE_CURRENT_LIST_DIR}")
 
 set (KOSPANEL_SOURCES
