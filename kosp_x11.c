@@ -234,7 +234,10 @@ void kosp_x11_get_last_x_error(int *error_code, int *request_code)
 
 /*-------------------------------------------------------------------------*/
 /*-------------------------------------------------------------------------*/
-Window kosp_x11_create_child_window(Window parent)
+Window kosp_x11_create_child_window(Window parent,
+        int x, int y,
+        unsigned int width, unsigned int height,
+        unsigned long background_color)
 {
     XSetWindowAttributes attrib;
     unsigned long create_mask = CWEventMask;
@@ -265,22 +268,34 @@ Window kosp_x11_create_child_window(Window parent)
 
 /*-------------------------------------------------------------------------*/
 /*-------------------------------------------------------------------------*/
-Window kosp_x11_create_toplevel_window(void)
+Window kosp_x11_create_toplevel_window(int x, int y,
+        unsigned int width, unsigned int height,
+        unsigned long background_color)
 {
     XSetWindowAttributes attrib;
+    XSizeHints size_hints;
+
+    /*
     unsigned long create_mask = CWColormap | CWOverrideRedirect | CWEventMask;
-    Window child = None;
+    */
+    unsigned long create_mask = CWColormap | CWEventMask;
+    Window window = None;
 
     attrib.colormap = kosp_x11._colormap;
     attrib.override_redirect = True;
-    attrib.event_mask = EnterWindowMask | LeaveWindowMask;
+    attrib.event_mask = EnterWindowMask |
+        LeaveWindowMask |
+        ButtonReleaseMask |
+        ButtonPressMask |
+        ButtonMotionMask |
+        ExposureMask;
 
-    child = XCreateWindow(kosp_x11._display,
+    window = XCreateWindow(kosp_x11._display,
             kosp_x11._root_window,
-            0,
-            0,
-            1,
-            1,
+            x,
+            y,
+            width,
+            height,
             0,
             kosp_x11._color_depth,
             InputOutput,
@@ -288,7 +303,37 @@ Window kosp_x11_create_toplevel_window(void)
             create_mask,
             &attrib);
 
-    return child;
+    XSelectInput(kosp_x11._display,
+            window,
+            EnterWindowMask |
+            LeaveWindowMask |
+            ButtonReleaseMask |
+            ButtonPressMask |
+            ButtonMotionMask |
+            ExposureMask |
+            StructureNotifyMask);
+
+    XSetWindowBackground(kosp_x11._display,
+            window,
+            background_color);
+
+    size_hints.flags = PSize | PMinSize;
+    size_hints.width = width;
+    size_hints.height = height;
+    size_hints.min_width = width;
+    size_hints.min_height = height;
+
+    XSetWMProperties(kosp_x11._display,
+            window,
+            NULL,
+            NULL,
+            NULL,
+            0,
+            &size_hints,
+            NULL,
+            NULL);
+
+    return window;
 }
 
 /*-------------------------------------------------------------------------*/
@@ -298,6 +343,26 @@ void kosp_x11_destroy_window(Window window)
     if (None != window)
     {
         XDestroyWindow(kosp_x11._display, window);
+    }
+}
+
+/*-------------------------------------------------------------------------*/
+/*-------------------------------------------------------------------------*/
+void kosp_x11_map_window(Window window)
+{
+    if (None != window)
+    {
+        XMapWindow(kosp_x11._display, window);
+    }
+}
+
+/*-------------------------------------------------------------------------*/
+/*-------------------------------------------------------------------------*/
+void kosp_x11_unmap_window(Window window)
+{
+    if (None != window)
+    {
+        XUnmapWindow(kosp_x11._display, window);
     }
 }
 

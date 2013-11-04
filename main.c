@@ -28,6 +28,10 @@ int main(int argc, char *argv[])
     k1_2_1 = kosp_ui_create(KPT_UI, k1_2, 77, 88, 99, 100, false);
     k1_2_2 = kosp_ui_create(KPT_UI, k1_2, 22, 33, 44, 55, true);
 
+    k1->show(k1);
+
+    kosp_app_exec();
+
     k1->destroy(k1);
     k2->destroy(k2);
 

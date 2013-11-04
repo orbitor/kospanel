@@ -156,11 +156,27 @@ kosp_ui_t *kosp_app_ui_event_responder_remove(kosp_ui_t *responder,
 static void _kosp_app_process_xevent(XEvent *event)
 {
     kosp_ui_event_responder_t *event_responder = 
-        _kosp_app_find_event_responder( event->xany.window);
+        _kosp_app_find_event_responder(event->xany.window);
 
     if (NULL == event_responder)
     {
+        printf("%s\tno event responder for window %d\n",
+                __func__,
+                (int) event->xany.window);
         return;
+    }
+
+    printf("%s\tevent responder found for window %d\n",
+            __func__,
+            (int) event->xany.window);
+
+    switch(event->type)
+    {
+    case ButtonPress:
+        event_responder->_responder->button_press(
+                event_responder->_responder,
+                (XButtonPressedEvent *) &event->xbutton);
+        break;
     }
 }
 
