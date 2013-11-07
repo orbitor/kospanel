@@ -8,6 +8,7 @@
 /*-------------------------------------------------------------------------*/
 
 #include <stdio.h>
+#include <stdlib.h>
 #include <string.h>
 #include <X11/Xlib.h>
 #include "kosp_base.h"
@@ -19,19 +20,20 @@
 /*-------------------------------------------------------------------------*/
 /* typedef for kosp_app */
 /*-------------------------------------------------------------------------*/
-typedef struct _kosp_app_t kosp_app_t;
-struct _kosp_app_t
-{
-    kosp_list_t        *_ui_event_responders;
-    bool                _run_state;
-    int                 _xfd;
-};
-
 typedef struct _kosp_ui_event_responder_t kosp_ui_event_responder_t;
 struct _kosp_ui_event_responder_t
 {
     kosp_ui_t  *_responder;
     Window      _window;
+};
+
+typedef struct _kosp_app_t kosp_app_t;
+struct _kosp_app_t
+{
+    kosp_list_t                *_ui_event_responders;
+    kosp_ui_event_responder_t  *_ui_event_responder_cache;
+    bool                        _run_state;
+    int                         _xfd;
 };
 
 /*-------------------------------------------------------------------------*/
@@ -129,9 +131,20 @@ int kosp_app_run_state(void)
 /*-------------------------------------------------------------------------*/
 void kosp_app_ui_event_responder_add(kosp_ui_t *responder, Window window)
 {
-    if (NULL != kosp_app._ui_event_responders)
+    if (NULL == responder ||
+            None == window)
     {
-        kosp_list_add(kosp_app._ui_event_responders, responder, false);
+        return;
+    }
+
+    kosp_ui_event_responder_t *uie = (kosp_ui_event_responder_t *) malloc(
+            sizeof(kosp_ui_event_responder_t));
+
+    if (NULL != uie)
+    {
+        uie->_responder = responder;
+        uie->_window = window;
+        kosp_list_add(kosp_app._ui_event_responders, uie, false);
     }
 }
 
@@ -140,15 +153,22 @@ void kosp_app_ui_event_responder_add(kosp_ui_t *responder, Window window)
 kosp_ui_t *kosp_app_ui_event_responder_remove(kosp_ui_t *responder,
         Window window)
 {
-    kosp_ui_t *retval = NULL;
+    kosp_ui_event_responder_t *uie = NULL;
 
-    if (NULL != kosp_app._ui_event_responders)
+    if (NULL == responder || None == window)
     {
-        retval = (kosp_ui_t *) kosp_list_remove(
-                kosp_app._ui_event_responders, responder);
+        return NULL;
     }
 
-    return retval;
+    uie = _kosp_app_find_event_responder(window);
+
+    if (NULL != uie)
+    {
+        uie = (kosp_ui_event_responder_t *) kosp_list_remove(
+                kosp_app._ui_event_responders, uie);
+    }
+
+    return uie->_responder;
 }
 
 /*-------------------------------------------------------------------------*/
@@ -184,15 +204,25 @@ static void _kosp_app_process_xevent(XEvent *event)
 /*-------------------------------------------------------------------------*/
 static kosp_ui_event_responder_t *_kosp_app_find_event_responder(Window window)
 {
-    kosp_ui_event_responder_t *retval = NULL;
+    kosp_ui_event_responder_t *uie = NULL;
 
-    if (NULL != kosp_app._ui_event_responders)
+    if (NULL != kosp_app._ui_event_responder_cache &&
+            kosp_app._ui_event_responder_cache->_window == window)
     {
-        retval = (kosp_ui_event_responder_t *) kosp_list_find_by_cb(
+        uie = kosp_app._ui_event_responder_cache;
+    }
+    else
+    {
+        uie = (kosp_ui_event_responder_t *) kosp_list_find_by_cb(
                 kosp_app._ui_event_responders, &window);
+
+        if (NULL != uie)
+        {
+            kosp_app._ui_event_responder_cache = uie;
+        }
     }
 
-    return retval;
+    return uie;
 }
 
 /*-------------------------------------------------------------------------*/
@@ -200,7 +230,9 @@ static kosp_ui_event_responder_t *_kosp_app_find_event_responder(Window window)
 static bool _kosp_app_ui_event_responder_find_cb(const void *ptr,
         const void *compare_data)
 {
-    if (kosp_ui_window(ptr) == *((const Window *)compare_data))
+    kosp_ui_event_responder_t *uie = (kosp_ui_event_responder_t *) ptr;
+
+    if (kosp_ui_window(uie->_responder) == *((const Window *)compare_data))
     {
         return true;
     }

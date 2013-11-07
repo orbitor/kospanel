@@ -263,6 +263,20 @@ Window kosp_x11_create_child_window(Window parent,
             create_mask,
             &attrib);
 
+    XSelectInput(kosp_x11._display,
+            child,
+            EnterWindowMask |
+            LeaveWindowMask |
+            ButtonReleaseMask |
+            ButtonPressMask |
+            ButtonMotionMask |
+            ExposureMask |
+            StructureNotifyMask);
+
+    XSetWindowBackground(kosp_x11._display,
+            child,
+            background_color);
+
     return child;
 }
 
@@ -352,6 +366,10 @@ void kosp_x11_map_window(Window window)
 {
     if (None != window)
     {
+        printf("%s\tmapping %d\n",
+                __func__,
+                (int) window);
+
         XMapWindow(kosp_x11._display, window);
     }
 }
