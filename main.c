@@ -23,10 +23,11 @@ int main(int argc, char *argv[])
     kosp_app_init(argc, argv);
 
     k1 = kosp_ui_create(KPT_UI, NULL, 10, 20, 100, 200, true);
-    k2 = kosp_ui_create(KPT_UI, NULL, 100, 50, 80, 22, true);
-    k1_2 = kosp_ui_create(KPT_UI, k1, 6, 3, 55, 65, false);
-    k1_2_1 = kosp_ui_create(KPT_UI, k1_2, 77, 88, 99, 100, false);
+    k1_2 = kosp_ui_create(KPT_UI, k1, 6, 3, 55, 65, true);
+    k1_2_1 = kosp_ui_create(KPT_UI, k1_2, 5, 5, 99, 100, true);
     k1_2_2 = kosp_ui_create(KPT_UI, k1_2, 22, 33, 44, 55, true);
+
+    k2 = kosp_ui_create(KPT_UI, NULL, 100, 50, 80, 22, true);
 
     k1->show(k1);
     k2->show(k2);

@@ -192,6 +192,11 @@ static void _kosp_app_process_xevent(XEvent *event)
 
     switch(event->type)
     {
+    case Expose:
+        event_responder->_responder->draw(
+                event_responder->_responder);
+        break;
+
     case ButtonPress:
         event_responder->_responder->button_press(
                 event_responder->_responder,
@@ -209,6 +214,9 @@ static kosp_ui_event_responder_t *_kosp_app_find_event_responder(Window window)
     if (NULL != kosp_app._ui_event_responder_cache &&
             kosp_app._ui_event_responder_cache->_window == window)
     {
+        printf("%s\tevent responder is cache\n",
+                __func__);
+
         uie = kosp_app._ui_event_responder_cache;
     }
     else
@@ -218,6 +226,9 @@ static kosp_ui_event_responder_t *_kosp_app_find_event_responder(Window window)
 
         if (NULL != uie)
         {
+            printf("%s\tupdating event responder cache\n",
+                    __func__);
+
             kosp_app._ui_event_responder_cache = uie;
         }
     }

@@ -252,10 +252,10 @@ Window kosp_x11_create_child_window(Window parent,
 
     child = XCreateWindow(kosp_x11._display,
             parent,
-            0,
-            0,
-            1,
-            1,
+            x,
+            y,
+            width,
+            height,
             0,
             kosp_x11._color_depth,
             InputOutput,
@@ -382,6 +382,22 @@ void kosp_x11_unmap_window(Window window)
     {
         XUnmapWindow(kosp_x11._display, window);
     }
+}
+
+/*-------------------------------------------------------------------------*/
+/*-------------------------------------------------------------------------*/
+GC kosp_x11_create_default_gc(void)
+{
+    XGCValues gcv;
+
+    gcv.function = GXset;
+
+    GC gc = XCreateGC(kosp_x11._display,
+            kosp_x11._root_window,
+            GCFunction,
+            &gcv);
+
+    return gc;
 }
 
 /*-------------------------------------------------------------------------*/

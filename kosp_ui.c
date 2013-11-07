@@ -18,7 +18,7 @@
 /*-------------------------------------------------------------------------*/
 static unsigned short _kosp_ui_default_palette[] =
 {
-    0x0000, 0x0000, 0x0000,     /* KU_CLR_FG_NORMAL */
+    0x0000, 0xffff, 0x0000,     /* KU_CLR_FG_NORMAL */
     0xbefb, 0xbefb, 0xbefb,     /* KU_CLR_BG_NORMAL */
     0xffff, 0xffff, 0xffff,     /* KU_CLR_FG_SELECTED */
     0x8617, 0x8617, 0x8617,     /* KU_CLR_BG_SELECTED */
@@ -70,8 +70,10 @@ kosp_ui_t *kosp_ui_create(int isa, void *parent, int x, int y,
         {
             kui->_window = kosp_x11_create_child_window(xparent,
                     x, y, width, height,
-                    kui->_palette[KU_CLR_BG_DISABLED]);
+                    kui->_palette[KU_CLR_BG_NORMAL]);
         }
+
+        kui->_gc = kosp_x11_create_default_gc();
 
         if (None != kui->_window && true == kui->_isa_responder)
         {
@@ -258,6 +260,10 @@ void kosp_ui_init_palette_with_data(void *vself,
         XAllocColor(kosp_x11_display(),
                 DefaultColormap(kosp_x11_display(), kosp_x11_screen()),
                 &xclr);
+        printf("%s\tindex %d\tcolor %lu\n",
+                __func__,
+                j,
+                xclr.pixel);
         self->_palette[j] = xclr.pixel;
         j++;
     }
@@ -311,8 +317,48 @@ void kosp_ui_init_palette(void *vself)
     kosp_ui_init_palette_with_data(vself, NULL, 0);
 }
 
+/*-------------------------------------------------------------------------*/
+/*-------------------------------------------------------------------------*/
 void kosp_ui_draw(void *vself)
 {
+    kosp_ui_t *self = (kosp_ui_t *) vself;
+
+    XSetForeground(kosp_x11_display(),
+            self->_gc,
+            self->_palette[KU_CLR_FG_NORMAL]);
+    XSetBackground(kosp_x11_display(),
+            self->_gc,
+            self->_palette[KU_CLR_BG_NORMAL]);
+    XSetLineAttributes(kosp_x11_display(),
+            self->_gc,
+            2,
+            LineSolid,
+            CapButt,
+            JoinMiter);
+    XFillRectangle(kosp_x11_display(),
+            self->_window,
+            self->_gc,
+            self->_posnsize.x,
+            self->_posnsize.y,
+            self->_posnsize.width,
+            self->_posnsize.height);
+    XSetForeground(kosp_x11_display(),
+            self->_gc,
+            self->_palette[KU_CLR_BG_HOVER]);
+    XDrawLine(kosp_x11_display(),
+            self->_window,
+            self->_gc,
+            self->_posnsize.x,
+            self->_posnsize.y,
+            self->_posnsize.x + self->_posnsize.width,
+            self->_posnsize.y + self->_posnsize.height);
+    XDrawLine(kosp_x11_display(),
+            self->_window,
+            self->_gc,
+            self->_posnsize.x + self->_posnsize.width,
+            self->_posnsize.y,
+            self->_posnsize.x,
+            self->_posnsize.y + self->_posnsize.height);
 }
 
 void kosp_ui_draw_children(void *vself)
