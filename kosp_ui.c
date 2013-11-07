@@ -19,7 +19,7 @@
 static unsigned short _kosp_ui_default_palette[] =
 {
     0x0000, 0xffff, 0x0000,     /* KU_CLR_FG_NORMAL */
-    0xbefb, 0xbefb, 0xbefb,     /* KU_CLR_BG_NORMAL */
+    0x0000, 0x0000, 0xffff,     /* KU_CLR_BG_NORMAL */
     0xffff, 0xffff, 0xffff,     /* KU_CLR_FG_SELECTED */
     0x8617, 0x8617, 0x8617,     /* KU_CLR_BG_SELECTED */
     0xd75c, 0xd75c, 0xd75c,     /* KU_CLR_FG_DISABLED */
@@ -73,7 +73,7 @@ kosp_ui_t *kosp_ui_create(int isa, void *parent, int x, int y,
                     kui->_palette[KU_CLR_BG_NORMAL]);
         }
 
-        kui->_gc = kosp_x11_create_default_gc();
+        kui->_gc = kosp_x11_create_default_gc(kui->_window);
 
         if (None != kui->_window && true == kui->_isa_responder)
         {
@@ -138,6 +138,7 @@ void kosp_ui_funcs_init(kosp_ui_t *self)
     self->leave_window = kosp_ui_event_leave_window;
     self->client_message = kosp_ui_event_client_message;
     self->property_notify = kosp_ui_event_property_notify;
+    self->configure_notify = kosp_ui_event_configure_notify;
     self->expose = kosp_ui_event_expose;
     self->unmap_notify = kosp_ui_event_unmap_notify;
     self->destroy_notify = kosp_ui_event_destroy_notify;
@@ -322,43 +323,44 @@ void kosp_ui_init_palette(void *vself)
 void kosp_ui_draw(void *vself)
 {
     kosp_ui_t *self = (kosp_ui_t *) vself;
+    int retval;
 
-    XSetForeground(kosp_x11_display(),
+    retval = XSetForeground(kosp_x11_display(),
             self->_gc,
             self->_palette[KU_CLR_FG_NORMAL]);
-    XSetBackground(kosp_x11_display(),
+    retval = XSetBackground(kosp_x11_display(),
             self->_gc,
             self->_palette[KU_CLR_BG_NORMAL]);
-    XSetLineAttributes(kosp_x11_display(),
+    retval = XSetLineAttributes(kosp_x11_display(),
             self->_gc,
             2,
             LineSolid,
             CapButt,
             JoinMiter);
-    XFillRectangle(kosp_x11_display(),
+    retval = XDrawRectangle(kosp_x11_display(),
             self->_window,
             self->_gc,
-            self->_posnsize.x,
-            self->_posnsize.y,
+            0,
+            0,
             self->_posnsize.width,
             self->_posnsize.height);
-    XSetForeground(kosp_x11_display(),
+    retval = XSetForeground(kosp_x11_display(),
             self->_gc,
             self->_palette[KU_CLR_BG_HOVER]);
-    XDrawLine(kosp_x11_display(),
+    retval = XDrawLine(kosp_x11_display(),
             self->_window,
             self->_gc,
-            self->_posnsize.x,
-            self->_posnsize.y,
-            self->_posnsize.x + self->_posnsize.width,
-            self->_posnsize.y + self->_posnsize.height);
-    XDrawLine(kosp_x11_display(),
+            0,
+            0,
+            self->_posnsize.width,
+            self->_posnsize.height);
+    retval = XDrawLine(kosp_x11_display(),
             self->_window,
             self->_gc,
-            self->_posnsize.x + self->_posnsize.width,
-            self->_posnsize.y,
-            self->_posnsize.x,
-            self->_posnsize.y + self->_posnsize.height);
+            self->_posnsize.width,
+            0,
+            0,
+            self->_posnsize.height);
 }
 
 void kosp_ui_draw_children(void *vself)
@@ -455,12 +457,22 @@ int kosp_ui_event_pointer_moved(void *vself, XPointerMovedEvent *event)
 int kosp_ui_event_enter_window(void *vself, XEnterWindowEvent *event)
 {
     printf("%s\tvself %p\n", __func__, vself);
+    XSetWindowBackground(kosp_x11_display(),
+            event->window,
+            ((kosp_ui_t *) vself)->_palette[KU_CLR_BG_HOVER]);
+    XClearWindow(kosp_x11_display(),
+            event->window);
     return 1;
 }
 
 int kosp_ui_event_leave_window(void *vself, XLeaveWindowEvent *event)
 {
     printf("%s\tvself %p\n", __func__, vself);
+    XSetWindowBackground(kosp_x11_display(),
+            event->window,
+            ((kosp_ui_t *) vself)->_palette[KU_CLR_BG_NORMAL]);
+    XClearWindow(kosp_x11_display(),
+            event->window);
     return 1;
 }
 
@@ -471,6 +483,12 @@ int kosp_ui_event_client_message(void *vself, XClientMessageEvent *event)
 }
 
 int kosp_ui_event_property_notify(void *vself, XPropertyEvent *event)
+{
+    printf("%s\tvself %p\n", __func__, vself);
+    return 1;
+}
+
+int kosp_ui_event_configure_notify(void *vself, XConfigureEvent *event)
 {
     printf("%s\tvself %p\n", __func__, vself);
     return 1;

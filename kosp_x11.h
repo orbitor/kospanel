@@ -39,7 +39,7 @@ void kosp_x11_destroy_window(Window window);
 
 void kosp_x11_map_window(Window window);
 void kosp_x11_unmap_window(Window window);
-GC kosp_x11_create_default_gc(void);
+GC kosp_x11_create_default_gc(Window window);
 
 #endif  /* COM_LUCKYGREENFROG_KOSP_X11_H_ */
 

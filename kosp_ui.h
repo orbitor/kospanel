@@ -87,6 +87,7 @@ typedef int  (*ui_func_event_enter_window) (void *vself, XEnterWindowEvent *even
 typedef int  (*ui_func_event_leave_window) (void *vself, XLeaveWindowEvent *event);
 typedef int  (*ui_func_event_client_message) (void *vself, XClientMessageEvent *event);
 typedef int  (*ui_func_event_property_notify) (void *vself, XPropertyEvent *event);
+typedef int  (*ui_func_event_configure_notify) (void *vself, XConfigureEvent *event);
 typedef int  (*ui_func_event_expose) (void *vself, XExposeEvent *event);
 typedef int  (*ui_func_event_unmap_notify) (void *vself, XUnmapEvent *event);
 typedef int  (*ui_func_event_destroy_notify) (void *vself, XDestroyWindowEvent *event);
@@ -107,6 +108,7 @@ int kosp_ui_event_enter_window(void *vself, XEnterWindowEvent *event);
 int kosp_ui_event_leave_window(void *vself, XLeaveWindowEvent *event);
 int kosp_ui_event_client_message(void *vself, XClientMessageEvent *event);
 int kosp_ui_event_property_notify(void *vself, XPropertyEvent *event);
+int kosp_ui_event_configure_notify(void *vself, XConfigureEvent *event);
 int kosp_ui_event_expose(void *vself, XExposeEvent *event);
 int kosp_ui_event_unmap_notify(void *vself, XUnmapEvent *event);
 int kosp_ui_event_destroy_notify(void *vself, XDestroyWindowEvent *event);
@@ -131,6 +133,7 @@ int kosp_ui_event_destroy_notify(void *vself, XDestroyWindowEvent *event);
     ui_func_event_leave_window      leave_window; \
     ui_func_event_client_message    client_message; \
     ui_func_event_property_notify   property_notify; \
+    ui_func_event_configure_notify  configure_notify; \
     ui_func_event_expose            expose; \
     ui_func_event_unmap_notify      unmap_notify; \
     ui_func_event_destroy_notify    destroy_notify; \

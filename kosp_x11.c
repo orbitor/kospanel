@@ -386,16 +386,12 @@ void kosp_x11_unmap_window(Window window)
 
 /*-------------------------------------------------------------------------*/
 /*-------------------------------------------------------------------------*/
-GC kosp_x11_create_default_gc(void)
+GC kosp_x11_create_default_gc(Window window)
 {
-    XGCValues gcv;
-
-    gcv.function = GXset;
-
     GC gc = XCreateGC(kosp_x11._display,
-            kosp_x11._root_window,
-            GCFunction,
-            &gcv);
+            window,
+            0,
+            NULL);
 
     return gc;
 }

@@ -197,10 +197,37 @@ static void _kosp_app_process_xevent(XEvent *event)
                 event_responder->_responder);
         break;
 
+    case ConfigureNotify:
+        event_responder->_responder->configure_notify(
+                event_responder->_responder,
+                (XConfigureEvent *) &event->xconfigure);
+        break;
+
+    case MotionNotify:
+        break;
+
+    case EnterNotify:
+        event_responder->_responder->enter_window(
+                event_responder->_responder,
+                (XEnterWindowEvent *) &event->xcrossing);
+        break;
+
+    case LeaveNotify:
+        event_responder->_responder->leave_window(
+                event_responder->_responder,
+                (XLeaveWindowEvent *) &event->xcrossing);
+        break;
+
     case ButtonPress:
         event_responder->_responder->button_press(
                 event_responder->_responder,
                 (XButtonPressedEvent *) &event->xbutton);
+        break;
+
+    case ButtonRelease:
+        break;
+
+    default:
         break;
     }
 }
