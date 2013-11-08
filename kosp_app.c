@@ -193,8 +193,9 @@ static void _kosp_app_process_xevent(XEvent *event)
     switch(event->type)
     {
     case Expose:
-        event_responder->_responder->draw(
-                event_responder->_responder);
+        event_responder->_responder->expose(
+                event_responder->_responder,
+                (XExposeEvent *) &event->xexpose);
         break;
 
     case ConfigureNotify:
@@ -225,6 +226,9 @@ static void _kosp_app_process_xevent(XEvent *event)
         break;
 
     case ButtonRelease:
+        event_responder->_responder->button_release(
+                event_responder->_responder,
+                (XButtonReleasedEvent *) &event->xbutton);
         break;
 
     default:
