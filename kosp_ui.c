@@ -277,6 +277,26 @@ void kosp_ui_line_draw(void *vself, XSegment segment, int pal_index)
 }
 
 /*-------------------------------------------------------------------------*/
+/*-------------------------------------------------------------------------*/
+void kosp_ui_background_color_set(void *vself, unsigned long color)
+{
+    XSetWindowBackground(kosp_x11_display(),
+            ((kosp_ui_t *) vself)->_window,
+            color);
+}
+
+/*-------------------------------------------------------------------------*/
+/*-------------------------------------------------------------------------*/
+void kosp_ui_smudge(void *vself)
+{
+    if (NULL != vself)
+    {
+        XClearWindow(kosp_x11_display(),
+                ((kosp_ui_t *) vself)->_window);
+    }
+}
+
+/*-------------------------------------------------------------------------*/
 /* virtual functions */
 /*-------------------------------------------------------------------------*/
 void kosp_ui_destroy(void *vself)

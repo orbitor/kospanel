@@ -68,6 +68,8 @@ void kosp_ui_init_palette_with_data(void *vself,
         int color_array_len);
 
 void kosp_ui_line_draw(void *vself, XSegment segment, int pal_index);
+void kosp_ui_color_set(void *vself, int index, unsigned long color);
+void kosp_ui_smudge(void *vself);
 
 /*-------------------------------------------------------------------------*/
 /* virtual functions */
