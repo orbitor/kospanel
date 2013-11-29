@@ -90,6 +90,13 @@ void kosp_text_view_font_load(kosp_text_view *self, const char *font_name)
 
     self->_font_info = XLoadQueryFont(kosp_x11_display(),
             font_name);
+
+    if (self->_font_info)
+    {
+        XSetFont(kosp_x11_display(),
+                self->_gc,
+                self->_font_info->fid);
+    }
 }
 
 /*-------------------------------------------------------------------------*/
@@ -131,7 +138,16 @@ void kosp_text_view_draw(void *vself)
     int x = 10;
     int y = 20;
 
-    kosp_ui_color_select_into_fg(vself, KU_CLR_FG_NORMAL);
+    kosp_ui_color_select_into_fg(vself, KU_CLR_BG_HOVER);
+    XDrawString(kosp_x11_display(),
+            self->_window,
+            self->_gc,
+            x++,
+            y++,
+            self->_text,
+            strlen(self->_text));
+
+    kosp_ui_color_select_into_fg(vself, KU_CLR_FG_HOVER);
     XDrawString(kosp_x11_display(),
             self->_window,
             self->_gc,

@@ -30,7 +30,7 @@ int main(int argc, char *argv[])
     k1_2_1 = kosp_ui_alloc_init(KPT_UI, k1_2, 5, 5, 49, 100, true);
 
     tv1 = kosp_text_view_alloc_init(k1_2, 70, 5, 250, 100, this_is_a_test);
-    kosp_text_view_font_load(tv1, "9x15");
+    kosp_text_view_font_load(tv1, "10x20");
 
     k1->show(k1);
 
