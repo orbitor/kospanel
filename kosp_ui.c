@@ -1,5 +1,5 @@
 /*-------------------------------------------------------------------------*/
-/* kosp_ui.h
+/* kosp_ui.c
  *
  * This module is part of kospanel
  * Copyright (c) 2013, James DeLisle    <jd@luckygreenfrog.com>
@@ -7,12 +7,13 @@
  */
 /*-------------------------------------------------------------------------*/
 
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
 #include "kosp_x11.h"
 #include "kosp_ui.h"
 #include "kosp_app.h"
+
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
 
 /*-------------------------------------------------------------------------*/
 /*-------------------------------------------------------------------------*/
@@ -30,71 +31,42 @@ static unsigned short _kosp_ui_default_palette[] =
 
 /*-------------------------------------------------------------------------*/
 /*-------------------------------------------------------------------------*/
-kosp_ui_t *kosp_ui_create_default(void)
+kosp_ui_t *kosp_ui_alloc(void)
 {
-    kosp_ui_t *kui = (kosp_ui_t *) malloc(sizeof(kosp_ui_t));
+    kosp_ui_t *self = (kosp_ui_t *) malloc(sizeof(kosp_ui_t));
 
-    if (NULL != kui)
+    if (NULL != self)
     {
-        memset(kui, 0, sizeof(kosp_ui_t));
+        memset(self, 0, sizeof(kosp_ui_t));
     }
 
-    return kui;
+    return self;
 }
 
 /*-------------------------------------------------------------------------*/
 /*-------------------------------------------------------------------------*/
-kosp_ui_t *kosp_ui_create(int isa, void *parent, int x, int y,
+kosp_ui_t *kosp_ui_alloc_init(int isa, void *parent, int x, int y,
+        unsigned int width, unsigned int height,
+        bool isa_responder)
+{
+    kosp_ui_t *self = kosp_ui_alloc();
+
+    if (NULL != self)
+    {
+        kosp_ui_init(self, isa, parent, x, y, width, height, isa_responder);
+    }
+
+    return self;
+}
+
+/*-------------------------------------------------------------------------*/
+/*-------------------------------------------------------------------------*/
+void kosp_ui_init(kosp_ui_t *self, int isa, void *parent, int x, int y, 
         unsigned int width, unsigned int height,
         bool isa_responder)
 {
     Window xparent = None;
-    kosp_ui_t *kui = kosp_ui_create_default();
 
-    if (NULL != kui)
-    {
-        kosp_ui_init(kui, isa, x, y, width, height, isa_responder);
-
-        if (NULL != parent)
-        {
-            xparent = ((kosp_ui_t *) parent)->_window;
-            kosp_ui_add(parent, kui, false);
-        }
-
-        if (None == xparent)
-        {
-            kui->_window = kosp_x11_create_toplevel_window(x, y,
-                    width, height, kui->_palette[KU_CLR_BG_NORMAL]);
-        }
-        else
-        {
-            kui->_window = kosp_x11_create_child_window(xparent,
-                    x, y, width, height,
-                    kui->_palette[KU_CLR_BG_NORMAL]);
-        }
-
-        kui->_gc = kosp_x11_create_default_gc(kui->_window);
-
-        if (None != kui->_window && true == kui->_isa_responder)
-        {
-            kosp_app_ui_event_responder_add(kui, kui->_window);
-        }
-
-        printf("%s\tcreating %p\tsize %d\n",
-                __func__,
-                kui,
-                sizeof(*kui));
-    }
-
-    return kui;
-}
-
-/*-------------------------------------------------------------------------*/
-/*-------------------------------------------------------------------------*/
-void kosp_ui_init(kosp_ui_t *self, int isa, int x, int y, 
-        unsigned int width, unsigned int height,
-        bool isa_responder)
-{
     kosp_base_init((kosp_base_t *) self, isa);
     kosp_ui_funcs_init(self);
     kosp_ui_set(self, isa, x, y, width, height, isa_responder);
@@ -102,6 +74,31 @@ void kosp_ui_init(kosp_ui_t *self, int isa, int x, int y,
 
     self->_window = None;
     self->_child_list = kosp_list_create(false, true);
+
+    if (NULL != parent)
+    {
+        xparent = ((kosp_ui_t *) parent)->_window;
+        kosp_ui_add(parent, self, false);
+    }
+
+    if (None == xparent)
+    {
+        self->_window = kosp_x11_create_toplevel_window(x, y,
+                width, height, self->_palette[KU_CLR_BG_NORMAL]);
+    }
+    else
+    {
+        self->_window = kosp_x11_create_child_window(xparent,
+                x, y, width, height,
+                self->_palette[KU_CLR_BG_NORMAL]);
+    }
+
+    self->_gc = kosp_x11_create_default_gc(self->_window);
+
+    if (None != self->_window && true == self->_isa_responder)
+    {
+        kosp_app_ui_event_responder_add(self, self->_window);
+    }
 }
 
 /*-------------------------------------------------------------------------*/
@@ -180,6 +177,26 @@ void kosp_ui_isa_responder_set(void *vself, bool isa_responder)
             kosp_app_ui_event_responder_remove(self, self->_window);
         }
     }
+}
+
+/*-------------------------------------------------------------------------*/
+/*-------------------------------------------------------------------------*/
+bool kosp_ui_is_enabled(void *vself)
+{
+    return ((kosp_ui_t *) vself)->_is_enabled;
+}
+
+/*-------------------------------------------------------------------------*/
+/*-------------------------------------------------------------------------*/
+void kosp_ui_is_enabled_set(void *vself, bool is_enabled)
+{
+    kosp_ui_t *self = (kosp_ui_t *) vself;
+
+    /*TODO: if we are being disabled, then we should also disable
+     * all of our sub-windows.
+     */
+    self->_is_enabled = is_enabled;
+    kosp_ui_smudge(self);
 }
 
 /*-------------------------------------------------------------------------*/
@@ -278,11 +295,47 @@ void kosp_ui_line_draw(void *vself, XSegment segment, int pal_index)
 
 /*-------------------------------------------------------------------------*/
 /*-------------------------------------------------------------------------*/
+unsigned long kosp_ui_color_get(void *vself, int index)
+{
+    return ((kosp_ui_t *) vself)->_palette[index];
+}
+
+/*-------------------------------------------------------------------------*/
+/*-------------------------------------------------------------------------*/
+void kosp_ui_color_set(void *vself, int index, unsigned long color)
+{
+    if (index < KU_CLR_MAX)
+    {
+        ((kosp_ui_t *) vself)->_palette[index] = color;
+    }
+}
+
+/*-------------------------------------------------------------------------*/
+/*-------------------------------------------------------------------------*/
+void kosp_ui_color_select_into_bg(void *vself, int index)
+{
+    XSetWindowBackground(kosp_x11_display(),
+            kosp_ui_window(vself),
+            kosp_ui_color_get(vself, index));
+}
+
+/*-------------------------------------------------------------------------*/
+/*-------------------------------------------------------------------------*/
+void kosp_ui_color_select_into_fg(void *vself, int index)
+{
+    XSetForeground(kosp_x11_display(),
+            ((kosp_ui_t *) vself)->_gc,
+            kosp_ui_color_get(vself, index));
+}
+
+/*-------------------------------------------------------------------------*/
+/*-------------------------------------------------------------------------*/
 void kosp_ui_background_color_set(void *vself, unsigned long color)
 {
     XSetWindowBackground(kosp_x11_display(),
             ((kosp_ui_t *) vself)->_window,
             color);
+    kosp_ui_smudge(vself);
 }
 
 /*-------------------------------------------------------------------------*/
@@ -347,12 +400,8 @@ void kosp_ui_draw(void *vself)
 
     printf("%s\tvself %p\n", __func__, vself);
 
-    retval = XSetForeground(kosp_x11_display(),
-            self->_gc,
-            self->_palette[KU_CLR_FG_NORMAL]);
-    retval = XSetBackground(kosp_x11_display(),
-            self->_gc,
-            self->_palette[KU_CLR_BG_NORMAL]);
+    kosp_ui_color_select_into_fg(self, KU_CLR_FG_NORMAL);
+
     retval = XSetLineAttributes(kosp_x11_display(),
             self->_gc,
             2,
@@ -368,9 +417,11 @@ void kosp_ui_draw(void *vself)
             self->_posnsize.width,
             self->_posnsize.height);
     */
+    /*
     retval = XSetForeground(kosp_x11_display(),
             self->_gc,
             self->_palette[KU_CLR_FG_DISABLED]);
+    */
     retval = XDrawLine(kosp_x11_display(),
             self->_window,
             self->_gc,
@@ -489,12 +540,10 @@ int kosp_ui_event_pointer_moved(void *vself, XPointerMovedEvent *event)
 int kosp_ui_event_enter_window(void *vself, XEnterWindowEvent *event)
 {
     printf("%s\tvself %p\n", __func__, vself);
-    XSetWindowBackground(kosp_x11_display(),
-            event->window,
+    kosp_ui_background_color_set(vself,
             ((kosp_ui_t *) vself)->_palette[KU_CLR_BG_HOVER]);
-
-    XClearWindow(kosp_x11_display(),
-            event->window);
+    kosp_ui_smudge(vself);
+    ((kosp_ui_t *) vself)->draw(vself);
     return 1;
 }
 
@@ -503,11 +552,10 @@ int kosp_ui_event_enter_window(void *vself, XEnterWindowEvent *event)
 int kosp_ui_event_leave_window(void *vself, XLeaveWindowEvent *event)
 {
     printf("%s\tvself %p\n", __func__, vself);
-    XSetWindowBackground(kosp_x11_display(),
-            event->window,
+    kosp_ui_background_color_set(vself,
             ((kosp_ui_t *) vself)->_palette[KU_CLR_BG_NORMAL]);
-    XClearWindow(kosp_x11_display(),
-            event->window);
+    kosp_ui_smudge(vself);
+    ((kosp_ui_t *) vself)->draw(vself);
     return 1;
 }
 

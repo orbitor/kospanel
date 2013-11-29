@@ -10,11 +10,12 @@
 #ifndef COM_LUCKYGREENFROG_KOSP_UI_H_
 #define COM_LUKCYGREENFROG_KOSP_UI_H_
 
-#include <X11/Xlib.h>
-#include <X11/Xutil.h>
 #include "kosp_types.h"
 #include "kosp_base.h"
 #include "kosp_list.h"
+
+#include <X11/Xlib.h>
+#include <X11/Xutil.h>
 
 /*-------------------------------------------------------------------------*/
 /* color indicies */
@@ -39,11 +40,11 @@ typedef struct _kosp_ui_t kosp_ui_t;
 /*-------------------------------------------------------------------------*/
 /* create and init functions */
 /*-------------------------------------------------------------------------*/
-kosp_ui_t *kosp_ui_create_default(void);
-kosp_ui_t *kosp_ui_create(int isa, void *parent, int x, int y,
+kosp_ui_t *kosp_ui_alloc(void);
+kosp_ui_t *kosp_ui_alloc_init(int isa, void *parent, int x, int y,
         unsigned int width, unsigned int height,
         bool isa_responder);
-void kosp_ui_init(kosp_ui_t *self, int isa, int x, int y,
+void kosp_ui_init(kosp_ui_t *self, int isa, void *parent, int x, int y,
         unsigned int width, unsigned int height,
         bool isa_responder);
 void kosp_ui_set(kosp_ui_t *self, int isa, int x, int y,
@@ -56,8 +57,10 @@ void kosp_ui_funcs_init(kosp_ui_t *self);
 /*-------------------------------------------------------------------------*/
 bool kosp_ui_isa_responder(void *vself);
 void kosp_ui_isa_responder_set(void *vself, bool isa_responder);
+bool kosp_ui_is_enabled(void *vself);
+void kosp_ui_is_enabled_set(void *vself, bool is_enabled);
 bool kosp_ui_is_visible(void *vself);
-void kosp_ui_is_visible_set(void *vself, bool is_enabled);
+void kosp_ui_is_visible_set(void *vself, bool is_visible);
 
 int kosp_ui_width(const void *vself);
 int kosp_ui_height(const void *vself);
@@ -69,6 +72,9 @@ void kosp_ui_init_palette_with_data(void *vself,
 
 void kosp_ui_line_draw(void *vself, XSegment segment, int pal_index);
 void kosp_ui_color_set(void *vself, int index, unsigned long color);
+unsigned long kosp_ui_color_get(void *vself, int index);
+void kosp_ui_color_select_into_bg(void *vself, int index);
+void kosp_ui_color_select_into_fg(void *vself, int index);
 void kosp_ui_smudge(void *vself);
 
 /*-------------------------------------------------------------------------*/
@@ -146,6 +152,7 @@ int kosp_ui_event_destroy_notify(void *vself, XDestroyWindowEvent *event);
     Window                          _window; \
     GC                              _gc; \
     bool                            _isa_responder; \
+    bool                            _is_enabled; \
     bool                            _is_visible;
 
 struct _kosp_ui_t
