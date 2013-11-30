@@ -10,6 +10,10 @@
 #ifndef COM_LUCKYGREENFROG_KOSP_TEXT_VIEW_H_
 #define COM_LUCKYGREENFROG_KOSP_TEXT_VIEW_H_
 
+#include "kosp_types.h"
+#include "kosp_base.h"
+#include "kosp_ui.h"
+
 /*-------------------------------------------------------------------------*/
 /* text alignment enum */
 /*-------------------------------------------------------------------------*/
@@ -61,6 +65,24 @@ void kosp_text_view_alignment_set(kosp_text_view *self, int alignment);
 /*-------------------------------------------------------------------------*/
 void kosp_text_view_destroy(void *vself);
 void kosp_text_view_draw(void *vself);
+void kosp_text_view_event_button_press(void *vself,
+        XButtonPressedEvent *event);
+void kosp_text_view_event_button_released(void *vself,
+        XButtonReleasedEvent *event);
+
+/*-------------------------------------------------------------------------*/
+/* type definition */
+/*-------------------------------------------------------------------------*/
+#define KOSP_TEXT_VIEW_MEMBERS_DECLARE \
+    KOSP_UI_MEMBERS_DECLARE \
+    XFontStruct    *_font_info; \
+    const char     *_text; \
+    int             _alignment;
+
+struct _kosp_text_view
+{
+    KOSP_TEXT_VIEW_MEMBERS_DECLARE
+};
 
 #endif  /* COM_LUCKYGREENFROG_KOSP_TEXT_VIEW_H_ */
 

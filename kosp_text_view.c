@@ -8,7 +8,6 @@
 /*-------------------------------------------------------------------------*/
 
 #include "kosp_x11.h"
-#include "kosp_ui.h"
 #include "kosp_text_view.h"
 
 #include <string.h>
@@ -16,18 +15,8 @@
 #include <stdio.h>
 
 /*-------------------------------------------------------------------------*/
-/* type definition */
 /*-------------------------------------------------------------------------*/
-#define KOSP_TEXT_VIEW_MEMBERS_DECLARE \
-    KOSP_UI_MEMBERS_DECLARE \
-    XFontStruct    *_font_info; \
-    const char     *_text; \
-    int             _alignment;
-
-struct _kosp_text_view
-{
-    KOSP_TEXT_VIEW_MEMBERS_DECLARE
-};
+#define KP_SELF_CAST_LOCAL KP_SELF_CAST(kosp_text_view)
 
 /*-------------------------------------------------------------------------*/
 /* create and init functions */
@@ -79,6 +68,8 @@ void kosp_text_view_funcs_init(kosp_text_view *self)
 {
     self->destroy = kosp_text_view_destroy;
     self->draw = kosp_text_view_draw;
+    self->button_press_notify = kosp_text_view_event_button_press;
+    self->button_release_notify = kosp_text_view_event_button_released;
 }
 
 /*-------------------------------------------------------------------------*/
@@ -128,9 +119,11 @@ void kosp_text_view_destroy(void *vself)
     kosp_ui_destroy(vself);
 }
 
+/*-------------------------------------------------------------------------*/
+/*-------------------------------------------------------------------------*/
 void kosp_text_view_draw(void *vself)
 {
-    kosp_text_view *self = (kosp_text_view *) vself;
+    KP_SELF_CAST_LOCAL;
 
     printf("%s\n", __func__);
 
@@ -155,5 +148,29 @@ void kosp_text_view_draw(void *vself)
             y,
             self->_text,
             strlen(self->_text));
+}
+
+/*-------------------------------------------------------------------------*/
+/*-------------------------------------------------------------------------*/
+void kosp_text_view_event_button_press(void *vself,
+        XButtonPressedEvent *event)
+{
+    KP_SELF_CAST_LOCAL;
+    printf("%s\tforwarding to parent %p\n",
+            __func__,
+            self->_parent);
+    self->_parent->button_press_notify(self->_parent, event);
+}
+
+/*-------------------------------------------------------------------------*/
+/*-------------------------------------------------------------------------*/
+void kosp_text_view_event_button_released(void *vself,
+        XButtonReleasedEvent *event)
+{
+    KP_SELF_CAST_LOCAL;
+    printf("%s\tforwarding to parent %p\n",
+            __func__,
+            self->_parent);
+    self->_parent->button_release_notify(self->_parent, event);
 }
 

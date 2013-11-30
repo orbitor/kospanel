@@ -45,7 +45,7 @@ kosp_ui_t *kosp_ui_alloc(void)
 
 /*-------------------------------------------------------------------------*/
 /*-------------------------------------------------------------------------*/
-kosp_ui_t *kosp_ui_alloc_init(int isa, void *parent, int x, int y,
+kosp_ui_t *kosp_ui_alloc_init(int isa, kosp_ui_t *parent, int x, int y,
         unsigned int width, unsigned int height,
         bool isa_responder)
 {
@@ -61,7 +61,7 @@ kosp_ui_t *kosp_ui_alloc_init(int isa, void *parent, int x, int y,
 
 /*-------------------------------------------------------------------------*/
 /*-------------------------------------------------------------------------*/
-void kosp_ui_init(kosp_ui_t *self, int isa, void *parent, int x, int y, 
+void kosp_ui_init(kosp_ui_t *self, int isa, kosp_ui_t *parent, int x, int y, 
         unsigned int width, unsigned int height,
         bool isa_responder)
 {
@@ -77,7 +77,7 @@ void kosp_ui_init(kosp_ui_t *self, int isa, void *parent, int x, int y,
 
     if (NULL != parent)
     {
-        xparent = ((kosp_ui_t *) parent)->_window;
+        xparent = parent->_window;
         kosp_ui_add(parent, self, false);
     }
 
@@ -128,15 +128,15 @@ void kosp_ui_funcs_init(kosp_ui_t *self)
     self->remove = kosp_ui_remove;
     self->show = kosp_ui_show;
     self->hide = kosp_ui_hide;
-    self->button_press = kosp_ui_event_button_press;
-    self->button_release = kosp_ui_event_button_release;
-    self->pointer_moved = kosp_ui_event_pointer_moved;
-    self->enter_window = kosp_ui_event_enter_window;
-    self->leave_window = kosp_ui_event_leave_window;
-    self->client_message = kosp_ui_event_client_message;
+    self->button_press_notify = kosp_ui_event_button_press;
+    self->button_release_notify = kosp_ui_event_button_release;
+    self->pointer_moved_notify = kosp_ui_event_pointer_moved;
+    self->enter_window_notify = kosp_ui_event_enter_window;
+    self->leave_window_notify = kosp_ui_event_leave_window;
+    self->client_message_notify = kosp_ui_event_client_message;
     self->property_notify = kosp_ui_event_property_notify;
     self->configure_notify = kosp_ui_event_configure_notify;
-    self->expose = kosp_ui_event_expose;
+    self->expose_notify = kosp_ui_event_expose;
     self->unmap_notify = kosp_ui_event_unmap_notify;
     self->destroy_notify = kosp_ui_event_destroy_notify;
 }
@@ -181,21 +181,21 @@ void kosp_ui_isa_responder_set(void *vself, bool isa_responder)
 
 /*-------------------------------------------------------------------------*/
 /*-------------------------------------------------------------------------*/
-bool kosp_ui_is_enabled(void *vself)
+int kosp_ui_state(void *vself)
 {
-    return ((kosp_ui_t *) vself)->_is_enabled;
+    return ((kosp_ui_t *) vself)->_state;
 }
 
 /*-------------------------------------------------------------------------*/
 /*-------------------------------------------------------------------------*/
-void kosp_ui_is_enabled_set(void *vself, bool is_enabled)
+void kosp_ui_state_set(void *vself, int state)
 {
     kosp_ui_t *self = (kosp_ui_t *) vself;
 
     /*TODO: if we are being disabled, then we should also disable
      * all of our sub-windows.
      */
-    self->_is_enabled = is_enabled;
+    self->_state = state;
     kosp_ui_smudge(self);
 }
 
@@ -203,36 +203,21 @@ void kosp_ui_is_enabled_set(void *vself, bool is_enabled)
 /*-------------------------------------------------------------------------*/
 int kosp_ui_width(const void *vself)
 {
-    if (vself)
-    {
-        return ((const kosp_ui_t *) vself)->_posnsize.width;
-    }
-
-    return -1;
+    return ((const kosp_ui_t *) vself)->_posnsize.width;
 }
 
 /*-------------------------------------------------------------------------*/
 /*-------------------------------------------------------------------------*/
 int kosp_ui_height(const void *vself)
 {
-    if (vself)
-    {
-        return ((const kosp_ui_t *) vself)->_posnsize.height;
-    }
-
-    return -1;
+    return ((const kosp_ui_t *) vself)->_posnsize.height;
 }
 
 /*-------------------------------------------------------------------------*/
 /*-------------------------------------------------------------------------*/
 Window kosp_ui_window(const void *vself)
 {
-    if (vself)
-    {
-        return ((const kosp_ui_t *) vself)->_window;
-    }
-
-    return None;
+    return ((const kosp_ui_t *) vself)->_window;
 }
 
 /*-------------------------------------------------------------------------*/
@@ -354,32 +339,25 @@ void kosp_ui_smudge(void *vself)
 /*-------------------------------------------------------------------------*/
 void kosp_ui_destroy(void *vself)
 {
-    kosp_ui_t *kui = NULL;
+    kosp_ui_t *self = (kosp_ui_t *) vself;
 
-    if (NULL == vself)
+    kosp_app_ui_event_responder_remove(self, self->_window);
+
+    if (NULL != self->_child_list)
     {
-        return;
+        kosp_list_destroy(self->_child_list);
+        self->_child_list = NULL;
     }
 
-    kui = (kosp_ui_t *) vself;
-
-    kosp_app_ui_event_responder_remove(kui, kui->_window);
-
-    if (NULL != kui->_child_list)
+    if (None != self->_window)
     {
-        kosp_list_destroy(kui->_child_list);
-        kui->_child_list = NULL;
-    }
-
-    if (None != kui->_window)
-    {
-        kosp_x11_destroy_window(kui->_window);
+        kosp_x11_destroy_window(self->_window);
     }
 
     printf("%s\tdestroying %p\tsize %d\n",
             __func__,
-            kui,
-            sizeof(*kui));
+            self,
+            sizeof(*self));
 
     kosp_base_destroy(vself);
 }
@@ -442,8 +420,16 @@ void kosp_ui_draw_children(void *vself)
 {
 }
 
+/*-------------------------------------------------------------------------*/
+/*-------------------------------------------------------------------------*/
 void kosp_ui_resize(void *vself, XRectangle new_size)
 {
+    XMoveResizeWindow(kosp_x11_display(),
+            ((kosp_ui_t *) vself)->_window,
+            new_size.x,
+            new_size.y,
+            new_size.width,
+            new_size.height);
 }
 
 /*-------------------------------------------------------------------------*/
@@ -456,6 +442,7 @@ void kosp_ui_add(void *vself, void *child, bool add_front)
     }
 
     kosp_list_add(((kosp_ui_t *) vself)->_child_list, child, add_front);
+    ((kosp_ui_t *) child)->_parent = (kosp_ui_t *) vself;
 }
 
 /*-------------------------------------------------------------------------*/
@@ -470,6 +457,7 @@ kosp_base_t *kosp_ui_remove(void *vself, void *child)
     }
 
     retval = kosp_list_remove(((kosp_ui_t *) vself)->_child_list, child);
+    ((kosp_ui_t *) child)->_parent = NULL;
     return retval;
 }
 
@@ -513,98 +501,87 @@ void kosp_ui_hide(void *vself)
 
 /*-------------------------------------------------------------------------*/
 /*-------------------------------------------------------------------------*/
-int kosp_ui_event_button_press(void *vself, XButtonPressedEvent *event)
+void kosp_ui_event_button_press(void *vself, XButtonPressedEvent *event)
 {
     printf("%s\tvself %p\n", __func__, vself);
-    return 1;
 }
 
 /*-------------------------------------------------------------------------*/
 /*-------------------------------------------------------------------------*/
-int kosp_ui_event_button_release(void *vself, XButtonReleasedEvent *event)
+void kosp_ui_event_button_release(void *vself, XButtonReleasedEvent *event)
 {
     printf("%s\tvself %p\n", __func__, vself);
-    return 1;
 }
 
 /*-------------------------------------------------------------------------*/
 /*-------------------------------------------------------------------------*/
-int kosp_ui_event_pointer_moved(void *vself, XPointerMovedEvent *event)
+void kosp_ui_event_pointer_moved(void *vself, XPointerMovedEvent *event)
 {
     printf("%s\tvself %p\n", __func__, vself);
-    return 1;
 }
 
 /*-------------------------------------------------------------------------*/
 /*-------------------------------------------------------------------------*/
-int kosp_ui_event_enter_window(void *vself, XEnterWindowEvent *event)
+void kosp_ui_event_enter_window(void *vself, XEnterWindowEvent *event)
 {
     printf("%s\tvself %p\n", __func__, vself);
     kosp_ui_background_color_set(vself,
             ((kosp_ui_t *) vself)->_palette[KU_CLR_BG_HOVER]);
     kosp_ui_smudge(vself);
     ((kosp_ui_t *) vself)->draw(vself);
-    return 1;
 }
 
 /*-------------------------------------------------------------------------*/
 /*-------------------------------------------------------------------------*/
-int kosp_ui_event_leave_window(void *vself, XLeaveWindowEvent *event)
+void kosp_ui_event_leave_window(void *vself, XLeaveWindowEvent *event)
 {
     printf("%s\tvself %p\n", __func__, vself);
     kosp_ui_background_color_set(vself,
             ((kosp_ui_t *) vself)->_palette[KU_CLR_BG_NORMAL]);
     kosp_ui_smudge(vself);
     ((kosp_ui_t *) vself)->draw(vself);
-    return 1;
 }
 
 /*-------------------------------------------------------------------------*/
 /*-------------------------------------------------------------------------*/
-int kosp_ui_event_client_message(void *vself, XClientMessageEvent *event)
+void kosp_ui_event_client_message(void *vself, XClientMessageEvent *event)
 {
     printf("%s\tvself %p\n", __func__, vself);
-    return 1;
 }
 
 /*-------------------------------------------------------------------------*/
 /*-------------------------------------------------------------------------*/
-int kosp_ui_event_property_notify(void *vself, XPropertyEvent *event)
+void kosp_ui_event_property_notify(void *vself, XPropertyEvent *event)
 {
     printf("%s\tvself %p\n", __func__, vself);
-    return 1;
 }
 
 /*-------------------------------------------------------------------------*/
 /*-------------------------------------------------------------------------*/
-int kosp_ui_event_configure_notify(void *vself, XConfigureEvent *event)
+void kosp_ui_event_configure_notify(void *vself, XConfigureEvent *event)
 {
     printf("%s\tvself %p\n", __func__, vself);
-    return 1;
 }
 
 /*-------------------------------------------------------------------------*/
 /*-------------------------------------------------------------------------*/
-int kosp_ui_event_expose(void *vself, XExposeEvent *event)
+void kosp_ui_event_expose(void *vself, XExposeEvent *event)
 {
     printf("%s\tvself %p\n", __func__, vself);
     ((kosp_ui_t *) vself)->draw(vself);
-    return 1;
 }
 
 /*-------------------------------------------------------------------------*/
 /*-------------------------------------------------------------------------*/
-int kosp_ui_event_unmap_notify(void *vself, XUnmapEvent *event)
+void kosp_ui_event_unmap_notify(void *vself, XUnmapEvent *event)
 {
     printf("%s\tvself %p\n", __func__, vself);
-    return 1;
 }
 
 /*-------------------------------------------------------------------------*/
 /*-------------------------------------------------------------------------*/
-int kosp_ui_event_destroy_notify(void *vself, XDestroyWindowEvent *event)
+void kosp_ui_event_destroy_notify(void *vself, XDestroyWindowEvent *event)
 {
     printf("%s\tvself %p\n", __func__, vself);
-    return 1;
 }
 

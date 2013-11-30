@@ -32,8 +32,12 @@ typedef enum
     KPT_PANEL,
     KPT_APP,
     KPT_LABEL,
+    KPT_BUTTON,
     KPT_MAX
 } KOSP_TYPES;
+
+/* 1 macro. That's it. No more */
+#define KP_SELF_CAST(_type) _type *self = (_type *) vself
 
 #endif  /* COM_LUCKYGREENFROG_KOSP_TYPES_H_ */
 

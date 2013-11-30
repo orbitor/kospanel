@@ -8,7 +8,7 @@
 /*-------------------------------------------------------------------------*/
 
 #ifndef COM_LUCKYGREENFROG_KOSP_UI_H_
-#define COM_LUKCYGREENFROG_KOSP_UI_H_
+#define COM_LUCKYGREENFROG_KOSP_UI_H_
 
 #include "kosp_types.h"
 #include "kosp_base.h"
@@ -34,6 +34,19 @@ enum
 };
 
 /*-------------------------------------------------------------------------*/
+/* keep track of state so we know how to draw ourselves */
+/*-------------------------------------------------------------------------*/
+enum
+{
+    KU_STATE_NONE,
+    KU_STATE_NORMAL,
+    KU_STATE_SELECTED,
+    KU_STATE_DISABLED,
+    KU_STATE_HOVER,
+    KU_STATE_MAX
+};
+
+/*-------------------------------------------------------------------------*/
 /*-------------------------------------------------------------------------*/
 typedef struct _kosp_ui_t kosp_ui_t;
 
@@ -41,10 +54,10 @@ typedef struct _kosp_ui_t kosp_ui_t;
 /* create and init functions */
 /*-------------------------------------------------------------------------*/
 kosp_ui_t *kosp_ui_alloc(void);
-kosp_ui_t *kosp_ui_alloc_init(int isa, void *parent, int x, int y,
+kosp_ui_t *kosp_ui_alloc_init(int isa, kosp_ui_t *parent, int x, int y,
         unsigned int width, unsigned int height,
         bool isa_responder);
-void kosp_ui_init(kosp_ui_t *self, int isa, void *parent, int x, int y,
+void kosp_ui_init(kosp_ui_t *self, int isa, kosp_ui_t *parent, int x, int y,
         unsigned int width, unsigned int height,
         bool isa_responder);
 void kosp_ui_set(kosp_ui_t *self, int isa, int x, int y,
@@ -57,8 +70,8 @@ void kosp_ui_funcs_init(kosp_ui_t *self);
 /*-------------------------------------------------------------------------*/
 bool kosp_ui_isa_responder(void *vself);
 void kosp_ui_isa_responder_set(void *vself, bool isa_responder);
-bool kosp_ui_is_enabled(void *vself);
-void kosp_ui_is_enabled_set(void *vself, bool is_enabled);
+int  kosp_ui_state(void *vself);
+void kosp_ui_state_set(void *vself, int state);
 bool kosp_ui_is_visible(void *vself);
 void kosp_ui_is_visible_set(void *vself, bool is_visible);
 
@@ -80,26 +93,6 @@ void kosp_ui_smudge(void *vself);
 /*-------------------------------------------------------------------------*/
 /* virtual functions */
 /*-------------------------------------------------------------------------*/
-typedef void (*ui_func_init_palette) (void *vself);
-typedef void (*ui_func_draw) (void *vself);
-typedef void (*ui_func_draw_children) (void *vself);
-typedef void (*ui_func_resize) (void *vself, XRectangle new_size);
-typedef void (*ui_func_add) (void *vself, void *child, bool add_front);
-typedef kosp_base_t *(*ui_func_remove) (void *vself, void *child);
-typedef void (*ui_func_show) (void *vself);
-typedef void (*ui_func_hide) (void *vself);
-typedef int  (*ui_func_event_button_press) (void *vself, XButtonPressedEvent *event);
-typedef int  (*ui_func_event_button_release) (void *vself, XButtonReleasedEvent *event);
-typedef int  (*ui_func_event_pointer_moved) (void *vself, XPointerMovedEvent *event);
-typedef int  (*ui_func_event_enter_window) (void *vself, XEnterWindowEvent *event);
-typedef int  (*ui_func_event_leave_window) (void *vself, XLeaveWindowEvent *event);
-typedef int  (*ui_func_event_client_message) (void *vself, XClientMessageEvent *event);
-typedef int  (*ui_func_event_property_notify) (void *vself, XPropertyEvent *event);
-typedef int  (*ui_func_event_configure_notify) (void *vself, XConfigureEvent *event);
-typedef int  (*ui_func_event_expose) (void *vself, XExposeEvent *event);
-typedef int  (*ui_func_event_unmap_notify) (void *vself, XUnmapEvent *event);
-typedef int  (*ui_func_event_destroy_notify) (void *vself, XDestroyWindowEvent *event);
-
 void kosp_ui_destroy(void *vself);
 void kosp_ui_init_palette(void *vself);
 void kosp_ui_draw(void *vself);
@@ -109,51 +102,51 @@ void kosp_ui_add(void *vself, void *child, bool add_front);
 kosp_base_t *kosp_ui_remove(void *vself, void *child);
 void kosp_ui_show(void *vself);
 void kosp_ui_hide(void *vself);
-int kosp_ui_event_button_press(void *vself, XButtonPressedEvent *event);
-int kosp_ui_event_button_release(void *vself, XButtonReleasedEvent *event);
-int kosp_ui_event_pointer_moved(void *vself, XPointerMovedEvent *event);
-int kosp_ui_event_enter_window(void *vself, XEnterWindowEvent *event);
-int kosp_ui_event_leave_window(void *vself, XLeaveWindowEvent *event);
-int kosp_ui_event_client_message(void *vself, XClientMessageEvent *event);
-int kosp_ui_event_property_notify(void *vself, XPropertyEvent *event);
-int kosp_ui_event_configure_notify(void *vself, XConfigureEvent *event);
-int kosp_ui_event_expose(void *vself, XExposeEvent *event);
-int kosp_ui_event_unmap_notify(void *vself, XUnmapEvent *event);
-int kosp_ui_event_destroy_notify(void *vself, XDestroyWindowEvent *event);
+void kosp_ui_event_button_press(void *vself, XButtonPressedEvent *event);
+void kosp_ui_event_button_release(void *vself, XButtonReleasedEvent *event);
+void kosp_ui_event_pointer_moved(void *vself, XPointerMovedEvent *event);
+void kosp_ui_event_enter_window(void *vself, XEnterWindowEvent *event);
+void kosp_ui_event_leave_window(void *vself, XLeaveWindowEvent *event);
+void kosp_ui_event_client_message(void *vself, XClientMessageEvent *event);
+void kosp_ui_event_property_notify(void *vself, XPropertyEvent *event);
+void kosp_ui_event_configure_notify(void *vself, XConfigureEvent *event);
+void kosp_ui_event_expose(void *vself, XExposeEvent *event);
+void kosp_ui_event_unmap_notify(void *vself, XUnmapEvent *event);
+void kosp_ui_event_destroy_notify(void *vself, XDestroyWindowEvent *event);
 
 /*-------------------------------------------------------------------------*/
 /* type declaration */
 /*-------------------------------------------------------------------------*/
 #define KOSP_UI_MEMBERS_DECLARE \
     KOSP_BASE_MEMBERS_DECLARE \
-    ui_func_init_palette            init_palette; \
-    ui_func_draw                    draw; \
-    ui_func_draw_children           draw_children; \
-    ui_func_resize                  resize; \
-    ui_func_add                     add; \
-    ui_func_remove                  remove; \
-    ui_func_show                    show; \
-    ui_func_hide                    hide; \
-    ui_func_event_button_press      button_press; \
-    ui_func_event_button_release    button_release; \
-    ui_func_event_pointer_moved     pointer_moved; \
-    ui_func_event_enter_window      enter_window; \
-    ui_func_event_leave_window      leave_window; \
-    ui_func_event_client_message    client_message; \
-    ui_func_event_property_notify   property_notify; \
-    ui_func_event_configure_notify  configure_notify; \
-    ui_func_event_expose            expose; \
-    ui_func_event_unmap_notify      unmap_notify; \
-    ui_func_event_destroy_notify    destroy_notify; \
-    unsigned long                   _palette[KU_CLR_MAX]; \
-    void                           *_parent; \
-    kosp_list_t                    *_child_list; \
-    XRectangle                      _posnsize; \
-    Window                          _window; \
-    GC                              _gc; \
-    bool                            _isa_responder; \
-    bool                            _is_enabled; \
-    bool                            _is_visible;
+    void (*init_palette) (void *vself); \
+    void (*draw) (void *vself); \
+    void (*draw_children) (void *vself); \
+    void (*resize) (void *vself, XRectangle new_size); \
+    void (*add) (void *vself, void *child, bool add_front); \
+    kosp_base_t *(*remove) (void *vself, void *child); \
+    void (*show) (void *vself); \
+    void (*hide) (void *vself); \
+    void (*button_press_notify) (void *vself, XButtonPressedEvent *event); \
+    void (*button_release_notify) (void *vself, XButtonReleasedEvent *event); \
+    void (*pointer_moved_notify) (void *vself, XPointerMovedEvent *event); \
+    void (*enter_window_notify) (void *vself, XEnterWindowEvent *event); \
+    void (*leave_window_notify) (void *vself, XLeaveWindowEvent *event); \
+    void (*client_message_notify) (void *vself, XClientMessageEvent *event); \
+    void (*property_notify) (void *vself, XPropertyEvent *event); \
+    void (*configure_notify) (void *vself, XConfigureEvent *event); \
+    void (*expose_notify) (void *vself, XExposeEvent *event); \
+    void (*unmap_notify) (void *vself, XUnmapEvent *event); \
+    void (*destroy_notify) (void *vself, XDestroyWindowEvent *event); \
+    unsigned long   _palette[KU_CLR_MAX]; \
+    kosp_ui_t      *_parent; \
+    kosp_list_t    *_child_list; \
+    XRectangle      _posnsize; \
+    Window          _window; \
+    GC              _gc; \
+    int             _state; \
+    bool            _isa_responder; \
+    bool            _is_visible;
 
 struct _kosp_ui_t
 {

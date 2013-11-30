@@ -193,7 +193,7 @@ static void _kosp_app_process_xevent(XEvent *event)
     switch(event->type)
     {
     case Expose:
-        event_responder->_responder->expose(
+        event_responder->_responder->expose_notify(
                 event_responder->_responder,
                 (XExposeEvent *) &event->xexpose);
         break;
@@ -208,25 +208,25 @@ static void _kosp_app_process_xevent(XEvent *event)
         break;
 
     case EnterNotify:
-        event_responder->_responder->enter_window(
+        event_responder->_responder->enter_window_notify(
                 event_responder->_responder,
                 (XEnterWindowEvent *) &event->xcrossing);
         break;
 
     case LeaveNotify:
-        event_responder->_responder->leave_window(
+        event_responder->_responder->leave_window_notify(
                 event_responder->_responder,
                 (XLeaveWindowEvent *) &event->xcrossing);
         break;
 
     case ButtonPress:
-        event_responder->_responder->button_press(
+        event_responder->_responder->button_press_notify(
                 event_responder->_responder,
                 (XButtonPressedEvent *) &event->xbutton);
         break;
 
     case ButtonRelease:
-        event_responder->_responder->button_release(
+        event_responder->_responder->button_release_notify(
                 event_responder->_responder,
                 (XButtonReleasedEvent *) &event->xbutton);
         break;
