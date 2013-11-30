@@ -3,11 +3,15 @@
 #include "kosp_ui.h"
 #include "kosp_app.h"
 #include "kosp_text_view.h"
+#include "kosp_button.h"
 
 #include <stdlib.h>
 #include <stdio.h>
 
 static const char *this_is_a_test = "This Is A Test";
+static const char *cancel = "Cancel";
+
+void button_callback(void *delegate, kosp_button *button);
 
 int main(int argc, char *argv[])
 {
@@ -16,6 +20,9 @@ int main(int argc, char *argv[])
     kosp_ui_t *k1_2_1;
 
     kosp_text_view *tv1;
+    kosp_text_view *tv2;
+
+    kosp_button *b1;
 
     if (false == kosp_x11_init())
     {
@@ -32,6 +39,10 @@ int main(int argc, char *argv[])
     tv1 = kosp_text_view_alloc_init(k1_2, 70, 5, 250, 100, this_is_a_test);
     kosp_text_view_font_load(tv1, "10x20");
 
+    b1 = kosp_button_alloc_init(k1_2, 70, 120, 250, 50);
+    kosp_button_delegate_set(b1, k1_2, button_callback);
+    tv2 = kosp_text_view_alloc_init(b1, 70, 5, 100, 40, cancel);
+
     k1->show(k1);
 
     kosp_app_exec();
@@ -43,5 +54,14 @@ int main(int argc, char *argv[])
     kosp_app_destroy();
 
     return 0;
+}
+
+void button_callback(void *delegate, kosp_button *button)
+{
+    printf("%s\tdelegate %p\tbutton %p\n",
+            __func__,
+            delegate,
+            button);
+    kosp_app_shutdown();
 }
 

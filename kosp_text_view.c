@@ -96,8 +96,10 @@ void kosp_text_view_font_unload(kosp_text_view *self)
 {
     if (NULL != self->_font_info)
     {
-        XUnloadFont(kosp_x11_display(),
-                self->_font_info->fid);
+        XFreeFont(kosp_x11_display(),
+                self->_font_info);
+
+        self->_font_info = NULL;
     }
 }
 /*-------------------------------------------------------------------------*/

@@ -154,6 +154,7 @@ kosp_ui_t *kosp_app_ui_event_responder_remove(kosp_ui_t *responder,
         Window window)
 {
     kosp_ui_event_responder_t *uie = NULL;
+    kosp_ui_t *retval = NULL;
 
     if (NULL == responder || None == window)
     {
@@ -166,9 +167,11 @@ kosp_ui_t *kosp_app_ui_event_responder_remove(kosp_ui_t *responder,
     {
         uie = (kosp_ui_event_responder_t *) kosp_list_remove(
                 kosp_app._ui_event_responders, uie);
+        free(uie);
+        retval = uie->_responder;
     }
 
-    return uie->_responder;
+    return retval;
 }
 
 /*-------------------------------------------------------------------------*/

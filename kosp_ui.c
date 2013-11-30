@@ -354,6 +354,12 @@ void kosp_ui_destroy(void *vself)
         kosp_x11_destroy_window(self->_window);
     }
 
+    if (self->_gc)
+    {
+        XFreeGC(kosp_x11_display(),
+                self->_gc);
+    }
+
     printf("%s\tdestroying %p\tsize %d\n",
             __func__,
             self,

@@ -33,6 +33,7 @@ set (KOSPANEL_SOURCES
         ${KOSPANEL_ROOT}/kosp_list.c
         ${KOSPANEL_ROOT}/kosp_ui.c
         ${KOSPANEL_ROOT}/kosp_text_view.c
+        ${KOSPANEL_ROOT}/kosp_button.c
         ${KOSPANEL_ROOT}/kosp_app.c
         ${KOSPANEL_ROOT}/main.c
 )
