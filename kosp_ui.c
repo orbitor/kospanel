@@ -349,15 +349,15 @@ void kosp_ui_destroy(void *vself)
         self->_child_list = NULL;
     }
 
-    if (None != self->_window)
-    {
-        kosp_x11_destroy_window(self->_window);
-    }
-
     if (self->_gc)
     {
         XFreeGC(kosp_x11_display(),
                 self->_gc);
+    }
+
+    if (None != self->_window)
+    {
+        kosp_x11_destroy_window(self->_window);
     }
 
     printf("%s\tdestroying %p\tsize %d\n",
@@ -553,6 +553,13 @@ void kosp_ui_event_leave_window(void *vself, XLeaveWindowEvent *event)
 void kosp_ui_event_client_message(void *vself, XClientMessageEvent *event)
 {
     printf("%s\tvself %p\n", __func__, vself);
+
+    if (event->data.l[0] == XInternAtom(kosp_x11_display(),
+                "WM_DELETE_WINDOW",
+                True))
+    {
+        ((kosp_ui_t *) vself)->destroy(vself);
+    }
 }
 
 /*-------------------------------------------------------------------------*/

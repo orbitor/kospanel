@@ -24,6 +24,7 @@ struct _kosp_x11_t
     Window _root_window;
     Colormap _colormap;
     Time _server_time;
+    Atom _wm_delete_window_atom;
     int _screen;
     int _color_depth;
     int _error_code;
@@ -55,6 +56,11 @@ bool kosp_x11_init(void)
             kosp_x11._screen);
     kosp_x11._colormap = DefaultColormap(kosp_x11._display,
             kosp_x11._screen);
+
+    kosp_x11._wm_delete_window_atom = XInternAtom(
+            kosp_x11._display,
+            "WM_DELETE_WINDOW",
+            False);
 
 #if 0
     {
@@ -346,6 +352,11 @@ Window kosp_x11_create_toplevel_window(int x, int y,
             &size_hints,
             NULL,
             NULL);
+
+    XSetWMProtocols(kosp_x11._display,
+            window,
+            &kosp_x11._wm_delete_window_atom,
+            sizeof(Atom));
 
     return window;
 }

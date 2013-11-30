@@ -234,6 +234,16 @@ static void _kosp_app_process_xevent(XEvent *event)
                 (XButtonReleasedEvent *) &event->xbutton);
         break;
 
+    case ClientMessage:
+        /*TODO: if this is a WM_DELETE_WINDOW message,
+         * and the responder is the top-level window
+         * for the application, then we should shutdown.
+         */
+        event_responder->_responder->client_message_notify(
+                event_responder->_responder,
+                (XClientMessageEvent *) &event->xclient);
+        break;
+
     default:
         break;
     }
