@@ -16,6 +16,10 @@
 
 /*-------------------------------------------------------------------------*/
 /*-------------------------------------------------------------------------*/
+static const char *defaultXftFontName = "sans-serif";
+
+/*-------------------------------------------------------------------------*/
+/*-------------------------------------------------------------------------*/
 #define KP_SELF_CAST_LOCAL KP_SELF_CAST(kosp_text_view)
 
 /*-------------------------------------------------------------------------*/
@@ -77,6 +81,7 @@ void kosp_text_view_funcs_init(kosp_text_view *self)
 /*-------------------------------------------------------------------------*/
 void kosp_text_view_font_load(kosp_text_view *self, const char *font_name)
 {
+#if 0
     kosp_text_view_font_unload(self);
 
     self->_font_info = XLoadQueryFont(kosp_x11_display(),
@@ -88,12 +93,18 @@ void kosp_text_view_font_load(kosp_text_view *self, const char *font_name)
                 self->_gc,
                 self->_font_info->fid);
     }
+#endif
+
+    self->_xft_font = XftFontOpen(kosp_x11_display(),
+            kosp_x11_screen(),
+            defaultXftFontName);
 }
 
 /*-------------------------------------------------------------------------*/
 /*-------------------------------------------------------------------------*/
 void kosp_text_view_font_unload(kosp_text_view *self)
 {
+#if 0
     if (NULL != self->_font_info)
     {
         XFreeFont(kosp_x11_display(),
@@ -101,6 +112,7 @@ void kosp_text_view_font_unload(kosp_text_view *self)
 
         self->_font_info = NULL;
     }
+#endif
 }
 /*-------------------------------------------------------------------------*/
 /*-------------------------------------------------------------------------*/
@@ -129,6 +141,7 @@ void kosp_text_view_draw(void *vself)
 
     printf("%s\n", __func__);
 
+#if 0
     /*TODO: don't disregard the alignment */
     int x = 10;
     int y = 20;
@@ -150,6 +163,20 @@ void kosp_text_view_draw(void *vself)
             y,
             self->_text,
             strlen(self->_text));
+#endif
+
+    if (NULL != self->_xft_font)
+    {
+        XftColor clr;
+        clr.pixel = self->_palette[1];
+        XftDrawStringUtf8(self->_window,
+                &clr,
+                self->_xft_font,
+                10,
+                20,
+                self->_text,
+                strlen(self->_text));
+    }
 }
 
 /*-------------------------------------------------------------------------*/

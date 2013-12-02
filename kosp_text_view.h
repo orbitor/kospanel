@@ -14,6 +14,8 @@
 #include "kosp_base.h"
 #include "kosp_ui.h"
 
+#include <X11/Xft/Xft.h>
+
 /*-------------------------------------------------------------------------*/
 /* text alignment enum */
 /*-------------------------------------------------------------------------*/
@@ -76,6 +78,7 @@ void kosp_text_view_event_button_released(void *vself,
 #define KOSP_TEXT_VIEW_MEMBERS_DECLARE \
     KOSP_UI_MEMBERS_DECLARE \
     XFontStruct    *_font_info; \
+    XftFont        *_xft_font; \
     const char     *_text; \
     int             _alignment;
 

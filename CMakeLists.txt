@@ -8,6 +8,8 @@
 cmake_minimum_required(VERSION 2.8)
 
 find_package(X11 REQUIRED)
+
+# finding Freetype on OSX is broken
 #find_package(Freetype REQUIRED)
 
 set (KOSPANEL_ROOT
@@ -38,6 +40,12 @@ set (KOSPANEL_SOURCES
         ${KOSPANEL_ROOT}/main.c
 )
 
+set (FREETYPE_INCLUDE_DIRS
+  "/usr/X11R6/include/freetype2"
+  CACHE PATH
+  "Freetype2 include directory"
+)
+
 include_directories(
         ${KOSPANEL_ROOT}
         ${X11_X11_INCLUDE_PATH}
@@ -66,4 +74,4 @@ target_link_libraries(kospanel
         ${X11_xcb_LIB}
         ${FREETYPE_LIBRARY}
 )
-        
+
