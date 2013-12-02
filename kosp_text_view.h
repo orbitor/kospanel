@@ -79,6 +79,7 @@ void kosp_text_view_event_button_released(void *vself,
     KOSP_UI_MEMBERS_DECLARE \
     XFontStruct    *_font_info; \
     XftFont        *_xft_font; \
+    XftDraw        *_xft_draw; \
     const char     *_text; \
     int             _alignment;
 

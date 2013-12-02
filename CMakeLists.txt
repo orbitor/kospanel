@@ -10,7 +10,7 @@ cmake_minimum_required(VERSION 2.8)
 find_package(X11 REQUIRED)
 
 # finding Freetype on OSX is broken
-#find_package(Freetype REQUIRED)
+find_package(Freetype REQUIRED)
 
 set (KOSPANEL_ROOT
         ${CMAKE_CURRENT_LIST_DIR}
@@ -38,12 +38,6 @@ set (KOSPANEL_SOURCES
         ${KOSPANEL_ROOT}/kosp_button.c
         ${KOSPANEL_ROOT}/kosp_app.c
         ${KOSPANEL_ROOT}/main.c
-)
-
-set (FREETYPE_INCLUDE_DIRS
-  "/usr/X11R6/include/freetype2"
-  CACHE PATH
-  "Freetype2 include directory"
 )
 
 include_directories(

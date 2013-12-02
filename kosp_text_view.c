@@ -16,7 +16,8 @@
 
 /*-------------------------------------------------------------------------*/
 /*-------------------------------------------------------------------------*/
-static const char *defaultXftFontName = "sans-serif";
+static const char *defaultXftFontName = "sans-12:bold";
+static XftFont *_default_xft_font = NULL;
 
 /*-------------------------------------------------------------------------*/
 /*-------------------------------------------------------------------------*/
@@ -95,9 +96,18 @@ void kosp_text_view_font_load(kosp_text_view *self, const char *font_name)
     }
 #endif
 
-    self->_xft_font = XftFontOpen(kosp_x11_display(),
-            kosp_x11_screen(),
-            defaultXftFontName);
+    if (NULL == _default_xft_font)
+    {
+        _default_xft_font = XftFontOpenName(kosp_x11_display(),
+                kosp_x11_screen(),
+                defaultXftFontName);
+    }
+
+    self->_xft_font = _default_xft_font;
+    self->_xft_draw = XftDrawCreate(kosp_x11_display(),
+            self->_window,
+            kosp_x11_visual(),
+            kosp_x11_colormap());
 }
 
 /*-------------------------------------------------------------------------*/
@@ -169,13 +179,17 @@ void kosp_text_view_draw(void *vself)
     {
         XftColor clr;
         clr.pixel = self->_palette[1];
-        XftDrawStringUtf8(self->_window,
+        XftDrawStringUtf8(self->_xft_draw,
                 &clr,
                 self->_xft_font,
                 10,
                 20,
-                self->_text,
+                (const unsigned char *) self->_text,
                 strlen(self->_text));
+    }
+    else
+    {
+        printf("===> %s\tself->_xft_font is NULL\n", __func__);
     }
 }
 

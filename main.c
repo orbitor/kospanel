@@ -42,6 +42,7 @@ int main(int argc, char *argv[])
     b1 = kosp_button_alloc_init(k1_2, 70, 120, 250, 50);
     kosp_button_delegate_set(b1, k1_2, button_callback);
     tv2 = kosp_text_view_alloc_init(b1, 70, 5, 100, 40, cancel);
+    kosp_text_view_font_load(tv2, "10x20");
 
     k1->show(k1);
 
