@@ -37,12 +37,12 @@ int main(int argc, char *argv[])
     k1_2_1 = kosp_ui_alloc_init(KPT_UI, k1_2, 5, 5, 49, 100, true);
 
     tv1 = kosp_text_view_alloc_init(k1_2, 70, 5, 250, 100, this_is_a_test);
-    kosp_text_view_font_load(tv1, "10x20");
+    kosp_text_view_font_load(tv1, "sans-18:bold");
 
     b1 = kosp_button_alloc_init(k1_2, 70, 120, 250, 50);
     kosp_button_delegate_set(b1, k1_2, button_callback);
     tv2 = kosp_text_view_alloc_init(b1, 70, 5, 100, 40, cancel);
-    kosp_text_view_font_load(tv2, "10x20");
+    kosp_text_view_font_load(tv2, "sans-12");
 
     k1->show(k1);
 

@@ -28,11 +28,12 @@ typedef enum
     KPT_BASE,
     KPT_LIST,
     KPT_LIST_ELEMENT,
-    KPT_UI,
-    KPT_PANEL,
     KPT_APP,
+    KPT_UI,
     KPT_LABEL,
     KPT_BUTTON,
+    KPT_PANEL,
+    KPT_WINDOW,
     KPT_MAX
 } KOSP_TYPES;
 

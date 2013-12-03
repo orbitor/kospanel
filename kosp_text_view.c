@@ -96,14 +96,21 @@ void kosp_text_view_font_load(kosp_text_view *self, const char *font_name)
     }
 #endif
 
+#if 0
     if (NULL == _default_xft_font)
     {
         _default_xft_font = XftFontOpenName(kosp_x11_display(),
                 kosp_x11_screen(),
                 defaultXftFontName);
     }
-
     self->_xft_font = _default_xft_font;
+#endif
+
+    /*TODO: font cache */
+    self->_xft_font = XftFontOpenName(kosp_x11_display(),
+            kosp_x11_screen(),
+            font_name);
+
     self->_xft_draw = XftDrawCreate(kosp_x11_display(),
             self->_window,
             kosp_x11_visual(),
@@ -123,6 +130,18 @@ void kosp_text_view_font_unload(kosp_text_view *self)
         self->_font_info = NULL;
     }
 #endif
+
+    if (NULL != self->_xft_draw)
+    {
+        XftDrawDestroy(self->_xft_draw);
+        self->_xft_draw = NULL;
+    }
+
+    if (NULL != self->_xft_font)
+    {
+        XftFontClose(kosp_x11_display(),
+                self->_xft_font);
+    }
 }
 /*-------------------------------------------------------------------------*/
 /*-------------------------------------------------------------------------*/
