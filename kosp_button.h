@@ -33,6 +33,7 @@ void kosp_button_funcs_init(kosp_button *self);
 void kosp_button_delegate_set(kosp_button *button,
         void *delegate,
         void(*button_clicked_callback)(void *delegate, kosp_button *button));
+void kosp_button_delegate_clear(kosp_button *button);
 
 /*-------------------------------------------------------------------------*/
 /* virtual function overrides */

@@ -73,6 +73,14 @@ void kosp_button_delegate_set(kosp_button *button,
 }
 
 /*-------------------------------------------------------------------------*/
+/*-------------------------------------------------------------------------*/
+void kosp_button_delegate_clear(kosp_button *button)
+{
+    button->_delegate = NULL;
+    button->button_clicked_callback = NULL;
+}
+
+/*-------------------------------------------------------------------------*/
 /* virtual function overrides */
 /*-------------------------------------------------------------------------*/
 void kosp_button_event_button_press(void *vself,
